@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>بلوكبسترز — لعبة المسابقات السداسية</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Tajawal', sans-serif;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1040 50%, #0d1530 100%);
+  color: #fff; direction: rtl;
+  -webkit-tap-highlight-color: transparent; user-select: none;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+
+.screen { display: none; width: 100%; height: 100%; }
+.screen.active { display: flex; }
+
+/* ─── SETUP ─── */
+#setup-screen { align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+.setup-card {
+  width: 100%; max-width: 620px; background: rgba(21,26,58,0.95);
+  border-radius: 24px; padding: 40px 32px;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.6); border: 1px solid rgba(245,200,66,0.15);
+}
+.setup-title { text-align: center; margin-bottom: 36px; }
+.setup-title h1 {
+  font-size: 46px; font-weight: 900; letter-spacing: 1px;
+  background: linear-gradient(135deg, #f5c842, #f59e0b, #f5c842);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.setup-title p { color: #8892b0; font-size: 15px; margin-top: 8px; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+@media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+
+.form-group {
+  background: rgba(255,255,255,0.04); border-radius: 16px; padding: 16px;
+  border: 1px solid rgba(255,255,255,0.06); transition: border-color 0.3s;
+}
+.form-group label { color: #8892b0; font-size: 12px; display: block; margin-bottom: 6px; }
+.form-group input[type="text"] {
+  width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 12px; color: #fff; font-size: 16px; outline: none;
+  font-family: 'Tajawal', sans-serif; direction: rtl; transition: border-color 0.3s;
+}
+.form-group input[type="text"]:focus { border-color: rgba(245,200,66,0.5); }
+
+.color-palette { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.color-swatch {
+  width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid transparent;
+  cursor: pointer; transition: all 0.2s;
+}
+.color-swatch.selected { border-color: #fff; transform: scale(1.2); }
+.color-swatch:hover { transform: scale(1.1); }
+
+.option-group { display: flex; gap: 6px; }
+.option-btn {
+  flex: 1; padding: 9px 6px; border-radius: 10px; cursor: pointer;
+  font-size: 12px; font-family: 'Tajawal', sans-serif; transition: all 0.2s;
+  background: rgba(255,255,255,0.04); color: #8892b0; border: 1px solid rgba(255,255,255,0.08);
+}
+.option-btn.selected { background: rgba(245,200,66,0.2); color: #f5c842; border-color: rgba(245,200,66,0.4); }
+
+.questions-section {
+  background: rgba(255,255,255,0.04); border-radius: 16px; padding: 16px;
+  margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.06);
+}
+.questions-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+.questions-header span { color: #fff; font-size: 14px; font-weight: 600; }
+.btn-sm {
+  padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px;
+  font-family: 'Tajawal', sans-serif; transition: all 0.2s;
+}
+.btn-gold { background: rgba(245,200,66,0.15); color: #f5c842; border: 1px solid rgba(245,200,66,0.3); }
+.btn-ghost { background: rgba(255,255,255,0.06); color: #8892b0; border: 1px solid rgba(255,255,255,0.1); }
+
+.template-box {
+  background: rgba(0,0,0,0.3); border-radius: 10px; padding: 12px;
+  margin-bottom: 12px; font-size: 12px; color: #8892b0;
+  direction: ltr; font-family: monospace; display: none;
+}
+.template-box.visible { display: block; }
+.template-box .label { color: #f5c842; margin-bottom: 4px; }
+
+.import-btn {
+  width: 100%; padding: 12px; border-radius: 10px; cursor: pointer;
+  font-size: 14px; font-family: 'Tajawal', sans-serif; transition: all 0.2s;
+  background: linear-gradient(135deg, rgba(245,200,66,0.2), rgba(245,200,66,0.1));
+  color: #f5c842; border: 1px dashed rgba(245,200,66,0.4);
+}
+.import-btn:hover { background: linear-gradient(135deg, rgba(245,200,66,0.3), rgba(245,200,66,0.2)); }
+.import-msg { text-align: center; font-size: 12px; margin-top: 8px; }
+
+.start-btn {
+  width: 100%; padding: 16px; border-radius: 14px;
+  background: linear-gradient(135deg, #f5c842, #f59e0b);
+  color: #0a0e27; border: none; cursor: pointer;
+  font-size: 22px; font-weight: 800; letter-spacing: 1px;
+  font-family: 'Tajawal', sans-serif;
+  box-shadow: 0 8px 30px rgba(245,200,66,0.3); transition: all 0.3s;
+}
+.start-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(245,200,66,0.4); }
+
+/* ─── GAME ─── */
+#game-screen { flex-direction: column; }
+
+.top-bar {
+  padding: 10px 16px; display: flex; justify-content: space-between;
+  align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-wrap: wrap; gap: 8px; flex-shrink: 0;
+}
+.team-badge {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 16px; border-radius: 14px; transition: all 0.4s;
+  background: rgba(255,255,255,0.03); border: 2px solid transparent;
+}
+.team-badge.active { animation: teamPulse 1.5s ease-in-out infinite; }
+@keyframes teamPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+
+.team-dot { width: 12px; height: 12px; border-radius: 50%; transition: box-shadow 0.3s; }
+.team-name { font-weight: 700; font-size: 15px; transition: color 0.3s; }
+.team-dir-label {
+  font-weight: 800; font-size: 12px; padding: 2px 8px; border-radius: 6px;
+  background: rgba(255,255,255,0.1); color: #fff;
+}
+
+.score-center { display: flex; align-items: center; gap: 10px; }
+.score-box {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.06); padding: 6px 18px; border-radius: 10px;
+}
+.score-num { font-weight: 800; font-size: 22px; }
+.score-sep { color: #8892b0; }
+.best-of-label { color: #8892b0; font-size: 12px; }
+
+/* Board */
+.board-area {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 20px 24px; position: relative; min-height: 0; overflow: hidden;
+}
+.board-wrapper {
+  width: 100%; max-width: 780px; position: relative;
+  animation: fadeInUp 0.5s ease-out;
+}
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Border hexagons are rendered in SVG */
+
+.board-svg { width: 100%; height: auto; display: block; }
+
+.hex-cell { cursor: pointer; }
+.hex-poly { transition: all 0.25s ease; stroke-width: 2; }
+.hex-cell:hover .hex-poly { stroke-width: 3; }
+.hex-cell.owned { cursor: default; }
+.hex-text {
+  pointer-events: none; font-family: 'Tajawal', sans-serif;
+  font-weight: 800; dominant-baseline: central; text-anchor: middle;
+}
+.hex-cell.win-path .hex-poly { animation: winPulse 1s ease-in-out infinite; }
+@keyframes winPulse { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.4); } }
+
+/* Toolbar */
+.bottom-toolbar {
+  padding: 10px 16px; border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; flex-shrink: 0;
+}
+.tool-btn {
+  padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.06); color: #8892b0;
+  cursor: pointer; font-size: 13px; font-family: 'Tajawal', sans-serif; transition: all 0.2s;
+}
+.tool-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.tool-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* ─── MODALS ─── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 900;
+  display: none; align-items: center; justify-content: center;
+  padding: 16px; background: rgba(0,0,0,0.85);
+  opacity: 0; transition: opacity 0.3s;
+}
+.modal-overlay.visible { display: flex; opacity: 1; }
+.modal-card {
+  width: 100%; border-radius: 24px; overflow: hidden;
+  transform: scale(0.92); transition: transform 0.3s ease-out; background: #151a3a;
+}
+.modal-overlay.visible .modal-card { transform: scale(1); }
+
+/* ─── BUZZER MODAL ─── */
+#buzzer-modal { z-index: 910; background: rgba(0,0,0,0.92); }
+#buzzer-modal .modal-card {
+  max-width: 700px; background: transparent; box-shadow: none; overflow: visible;
+}
+.buzzer-letter-display {
+  text-align: center; margin-bottom: 28px;
+}
+.buzzer-hex {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 90px; height: 90px; font-size: 52px; font-weight: 900; color: #fff;
+  background: linear-gradient(135deg, #f5c842, #f59e0b);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+.buzzer-prompt {
+  text-align: center; font-size: 22px; color: #8892b0; margin-bottom: 32px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.buzzer-buttons {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+.buzzer-btn {
+  padding: 40px 20px; border-radius: 24px; border: none; cursor: pointer;
+  font-size: 28px; font-weight: 900; font-family: 'Tajawal', sans-serif;
+  color: #fff; transition: all 0.15s; position: relative; overflow: hidden;
+}
+.buzzer-btn:active { transform: scale(0.95); }
+.buzzer-btn:hover { transform: translateY(-3px); }
+.buzzer-btn .buzzer-sub {
+  display: block; font-size: 14px; font-weight: 500; opacity: 0.8; margin-top: 6px;
+}
+.buzzer-skip {
+  display: block; text-align: center; margin-top: 20px; color: #555;
+  font-size: 13px; cursor: pointer; background: none; border: none;
+  font-family: 'Tajawal', sans-serif; transition: color 0.2s;
+}
+.buzzer-skip:hover { color: #8892b0; }
+
+/* Question Modal */
+#question-modal .modal-card { max-width: 650px; }
+.q-header {
+  padding: 20px 28px; display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.q-letter-box {
+  width: 54px; height: 54px; border-radius: 14px; display: flex;
+  align-items: center; justify-content: center; font-size: 30px; font-weight: 800; color: #fff;
+}
+.q-team-info { margin-right: 12px; }
+.q-team-name { font-weight: 700; font-size: 16px; }
+.q-steal-badge { color: #f5c842; font-size: 12px; font-weight: 600; }
+.q-category { color: #8892b0; font-size: 12px; }
+.q-close-btn {
+  background: rgba(255,255,255,0.1); color: #fff; border: none;
+  border-radius: 10px; width: 38px; height: 38px; cursor: pointer; font-size: 18px;
+}
+.q-body { padding: 40px 32px; text-align: center; }
+.q-text { color: #fff; font-size: 28px; font-weight: 600; line-height: 1.8; direction: rtl; }
+.q-answer-wrap { padding: 0 32px 20px; text-align: center; display: none; }
+.q-answer-wrap.visible { display: block; }
+.q-answer-box {
+  background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3);
+  border-radius: 14px; padding: 16px 24px; display: inline-block;
+}
+.q-answer-label { color: #8892b0; font-size: 12px; margin-bottom: 4px; }
+.q-answer-text { color: #22c55e; font-size: 24px; font-weight: 700; direction: rtl; }
+.q-actions { padding: 16px 28px 28px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.q-btn {
+  padding: 12px 32px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 16px; font-weight: 700; font-family: 'Tajawal', sans-serif; transition: all 0.2s;
+}
+.q-btn-reveal { background: rgba(255,255,255,0.08); color: #8892b0; border: 1px solid rgba(255,255,255,0.15); }
+.q-btn-correct { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; box-shadow: 0 4px 20px rgba(34,197,94,0.3); }
+.q-btn-wrong { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; box-shadow: 0 4px 20px rgba(239,68,68,0.3); }
+.q-btn:hover { transform: translateY(-1px); }
+
+/* Steal Modal */
+#steal-modal .modal-card { max-width: 460px; padding: 36px 28px; text-align: center; }
+.steal-icon { font-size: 52px; margin-bottom: 16px; }
+.steal-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+.steal-desc { color: #8892b0; font-size: 15px; margin-bottom: 24px; }
+.steal-team-name { font-weight: 700; }
+.steal-actions { display: flex; gap: 12px; justify-content: center; }
+.steal-yes {
+  padding: 12px 32px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 16px; font-weight: 700; color: #fff; font-family: 'Tajawal', sans-serif;
+}
+.steal-no {
+  padding: 12px 32px; border-radius: 12px; cursor: pointer;
+  font-size: 16px; font-family: 'Tajawal', sans-serif;
+  background: rgba(255,255,255,0.08); color: #8892b0; border: 1px solid rgba(255,255,255,0.15);
+}
+
+/* Win Modal */
+#win-modal { z-index: 1000; background: rgba(0,0,0,0.92); }
+#win-modal .modal-card {
+  max-width: 500px; padding: 48px 32px; text-align: center;
+  background: transparent; box-shadow: none;
+}
+.win-icon { font-size: 86px; margin-bottom: 12px; }
+.win-team { font-size: 48px; font-weight: 900; margin-bottom: 12px; }
+.win-label { font-size: 24px; margin-bottom: 8px; }
+.win-score { color: #8892b0; font-size: 20px; margin-bottom: 36px; }
+.win-score-num { font-weight: 800; }
+.win-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.win-btn-primary {
+  padding: 14px 36px; border-radius: 14px; background: linear-gradient(135deg, #f5c842, #f59e0b);
+  color: #0a0e27; border: none; cursor: pointer; font-size: 18px; font-weight: 800; font-family: 'Tajawal', sans-serif;
+}
+.win-btn-secondary {
+  padding: 14px 36px; border-radius: 14px; background: rgba(255,255,255,0.08); color: #fff;
+  border: 1px solid rgba(255,255,255,0.15); cursor: pointer; font-size: 18px; font-family: 'Tajawal', sans-serif;
+}
+.win-btn-ghost {
+  padding: 14px 36px; border-radius: 14px; background: rgba(255,255,255,0.06); color: #8892b0;
+  border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-size: 16px; font-family: 'Tajawal', sans-serif;
+}
+
+/* Editor */
+#editor-modal { z-index: 950; }
+#editor-modal .modal-card {
+  max-width: 720px; max-height: 90vh; display: flex; flex-direction: column;
+  border: 1px solid rgba(245,200,66,0.2);
+}
+.editor-header {
+  padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+}
+.editor-header h2 { font-size: 20px; }
+.editor-body { display: flex; flex: 1; min-height: 0; }
+.letter-list {
+  width: 70px; border-left: 1px solid rgba(255,255,255,0.08);
+  overflow-y: auto; padding: 8px 4px; display: flex; flex-direction: column; gap: 2px; flex-shrink: 0;
+}
+.letter-btn {
+  padding: 8px 4px; border-radius: 8px; background: transparent;
+  color: #8892b0; border: none; cursor: pointer; font-size: 18px;
+  font-weight: 700; font-family: 'Tajawal', sans-serif; position: relative; transition: all 0.2s;
+}
+.letter-btn.selected { background: rgba(245,200,66,0.2); color: #f5c842; }
+.letter-btn .dot {
+  position: absolute; top: 2px; left: 4px; width: 6px; height: 6px;
+  background: #22c55e; border-radius: 50%; display: none;
+}
+.letter-btn.has-q .dot { display: block; }
+.editor-content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.editor-letter-title { color: #f5c842; font-size: 14px; font-weight: 600; }
+.q-item {
+  background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px;
+  border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: flex-start;
+}
+.q-item-text { flex: 1; }
+.q-item-question { color: #fff; font-size: 14px; margin-bottom: 4px; }
+.q-item-answer { color: #22c55e; font-size: 12px; }
+.q-item-cat { color: #8892b0; font-size: 11px; margin-top: 2px; }
+.q-item-del {
+  background: rgba(239,68,68,0.15); color: #ef4444; border: none;
+  border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 12px;
+  font-family: 'Tajawal', sans-serif; margin-right: 8px; flex-shrink: 0;
+}
+.add-q-form {
+  background: rgba(245,200,66,0.05); border-radius: 12px; padding: 14px;
+  border: 1px dashed rgba(245,200,66,0.2);
+}
+.add-q-form .form-label { color: #f5c842; font-size: 12px; margin-bottom: 8px; }
+.add-q-form input {
+  width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 14px; outline: none;
+  font-family: 'Tajawal', sans-serif; direction: rtl; margin-bottom: 6px;
+}
+.add-q-row { display: flex; gap: 6px; }
+.add-q-row input { flex: 1; }
+.add-q-btn {
+  margin-top: 8px; padding: 8px 22px; border-radius: 8px;
+  background: linear-gradient(135deg, #f5c842, #f59e0b);
+  color: #0a0e27; border: none; cursor: pointer; font-size: 13px;
+  font-weight: 700; font-family: 'Tajawal', sans-serif;
+}
+.editor-actions { display: flex; gap: 8px; }
+.btn-danger { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+.btn-close-editor {
+  padding: 6px 16px; border-radius: 8px; background: rgba(255,255,255,0.1);
+  color: #fff; border: none; cursor: pointer; font-size: 16px;
+}
+
+@media (max-width: 600px) {
+  .setup-card { padding: 28px 18px; }
+  .setup-title h1 { font-size: 36px; }
+  .team-badge { padding: 6px 10px; }
+  .team-name { font-size: 13px; }
+  .score-num { font-size: 18px; }
+  .q-text { font-size: 22px; }
+  .tool-btn { padding: 6px 10px; font-size: 11px; }
+  .top-bar { padding: 8px 10px; }
+  .bottom-toolbar { padding: 8px 10px; }
+  .win-team { font-size: 36px; }
+  .buzzer-btn { padding: 28px 16px; font-size: 22px; }
+  .buzzer-hex { width: 70px; height: 70px; font-size: 40px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════ SETUP SCREEN ════════ -->
+<div id="setup-screen" class="screen active">
+  <div class="setup-card">
+    <div class="setup-title">
+      <h1>بلوكبسترز</h1>
+      <p>لعبة المسابقات السداسية</p>
+    </div>
+    <div class="form-row">
+      <div class="form-group" id="team1-group">
+        <label>الفريق الأول (← →)</label>
+        <input type="text" id="team1-name" value="الفريق الأول">
+        <div class="color-palette" id="team1-colors"></div>
+      </div>
+      <div class="form-group" id="team2-group">
+        <label>الفريق الثاني (↑ ↓)</label>
+        <input type="text" id="team2-name" value="الفريق الثاني">
+        <div class="color-palette" id="team2-colors"></div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label style="color:#8892b0;font-size:12px;display:block;margin-bottom:6px">حجم اللوحة</label>
+        <div class="option-group" id="grid-options"></div>
+      </div>
+      <div>
+        <label style="color:#8892b0;font-size:12px;display:block;margin-bottom:6px">عدد الجولات</label>
+        <div class="option-group" id="round-options"></div>
+      </div>
+    </div>
+    <div class="questions-section">
+      <div class="questions-header">
+        <span id="q-count-label">الأسئلة (28 سؤال)</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sm btn-gold" onclick="openEditor()">تعديل الأسئلة</button>
+          <button class="btn-sm btn-ghost" onclick="toggleTemplate()">القالب</button>
+        </div>
+      </div>
+      <div class="template-box" id="template-box">
+        <div class="label">CSV / Excel Template:</div>
+        <div>حرف,سؤال,إجابة,تصنيف</div>
+        <div>ب,ما عاصمة البحرين؟,المنامة,جغرافيا</div>
+        <div>ت,ما أطول نهر في أفريقيا؟,نهر النيل,جغرافيا</div>
+        <div style="color:#666;margin-top:6px">* التصنيف اختياري</div>
+      </div>
+      <div>
+        <input type="file" id="file-input" accept=".csv,.tsv,.xlsx,.xls" style="display:none" onchange="handleFileImport(event)">
+        <button class="import-btn" onclick="document.getElementById('file-input').click()">📁 استيراد من ملف CSV / Excel</button>
+      </div>
+      <div class="import-msg" id="import-msg"></div>
+    </div>
+    <button class="start-btn" onclick="startGame()">ابدأ اللعبة ⬡</button>
+  </div>
+</div>
+
+<!-- ════════ GAME SCREEN ════════ -->
+<div id="game-screen" class="screen">
+  <div class="top-bar">
+    <div class="team-badge" id="badge-team1">
+      <div class="team-dot" id="dot-team1"></div>
+      <span class="team-name" id="name-team1"></span>
+      <span class="team-dir-label">← →</span>
+    </div>
+    <div class="score-center">
+      <div class="score-box">
+        <span class="score-num" id="score-team1">0</span>
+        <span class="score-sep">—</span>
+        <span class="score-num" id="score-team2">0</span>
+      </div>
+      <span class="best-of-label" id="best-of-label"></span>
+    </div>
+    <div class="team-badge" id="badge-team2">
+      <span class="team-dir-label">↑ ↓</span>
+      <span class="team-name" id="name-team2"></span>
+      <div class="team-dot" id="dot-team2"></div>
+    </div>
+  </div>
+
+  <div class="board-area">
+    <div class="board-wrapper" id="board-wrapper">
+      <svg id="board-svg" class="board-svg"></svg>
+    </div>
+  </div>
+
+  <div class="bottom-toolbar">
+    <button class="tool-btn" onclick="goToSetup()">⚙️ الإعدادات</button>
+    <button class="tool-btn" onclick="regenerateBoard()">🔀 تبديل الحروف</button>
+    <button class="tool-btn" id="undo-btn" onclick="undoMove()" disabled>↩️ تراجع</button>
+    <button class="tool-btn" onclick="toggleFullscreen()">🔳 ملء الشاشة</button>
+    <button class="tool-btn" onclick="newMatch()">🔄 مباراة جديدة</button>
+  </div>
+</div>
+
+<!-- ════════ BUZZER MODAL ════════ -->
+<div id="buzzer-modal" class="modal-overlay">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="buzzer-letter-display">
+      <div class="buzzer-hex" id="buzzer-letter"></div>
+    </div>
+    <div class="buzzer-prompt">🔔 من يجيب أولاً؟</div>
+    <div class="buzzer-buttons">
+      <button class="buzzer-btn" id="buzzer-btn-1" onclick="buzzIn(0)">
+        <span id="buzzer-name-1"></span>
+        <span class="buzzer-sub">اضغط للإجابة</span>
+      </button>
+      <button class="buzzer-btn" id="buzzer-btn-2" onclick="buzzIn(1)">
+        <span id="buzzer-name-2"></span>
+        <span class="buzzer-sub">اضغط للإجابة</span>
+      </button>
+    </div>
+    <button class="buzzer-skip" onclick="skipBuzzer()">تخطي ✕</button>
+  </div>
+</div>
+
+<!-- ════════ QUESTION MODAL ════════ -->
+<div id="question-modal" class="modal-overlay" onclick="closeQuestionModal()">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="q-header" id="q-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="q-letter-box" id="q-letter-box"></div>
+        <div class="q-team-info">
+          <div class="q-team-name" id="q-team-name"></div>
+          <div class="q-steal-badge" id="q-steal-badge" style="display:none">⚡ فرصة سرقة!</div>
+          <div class="q-category" id="q-category"></div>
+        </div>
+      </div>
+      <button class="q-close-btn" onclick="closeQuestionModal()">✕</button>
+    </div>
+    <div class="q-body">
+      <div class="q-text" id="q-text"></div>
+    </div>
+    <div class="q-answer-wrap" id="q-answer-wrap">
+      <div class="q-answer-box">
+        <div class="q-answer-label">الإجابة</div>
+        <div class="q-answer-text" id="q-answer-text"></div>
+      </div>
+    </div>
+    <div class="q-actions">
+      <button class="q-btn q-btn-reveal" id="q-reveal-btn" onclick="revealAnswer()">👁 إظهار الإجابة</button>
+      <button class="q-btn q-btn-correct" onclick="handleCorrect()">✓ إجابة صحيحة</button>
+      <button class="q-btn q-btn-wrong" onclick="handleWrong()">✗ إجابة خاطئة</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ STEAL MODAL ════════ -->
+<div id="steal-modal" class="modal-overlay">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="steal-icon">⚡</div>
+    <div class="steal-title">فرصة السرقة!</div>
+    <div class="steal-desc">هل يريد <span class="steal-team-name" id="steal-team-name"></span> محاولة الإجابة؟</div>
+    <div class="steal-actions">
+      <button class="steal-yes" id="steal-yes-btn" onclick="acceptSteal()">نعم، نحاول!</button>
+      <button class="steal-no" onclick="declineSteal()">لا، تخطي</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ WIN MODAL ════════ -->
+<div id="win-modal" class="modal-overlay">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="win-icon" id="win-icon">🎉</div>
+    <div class="win-team" id="win-team-name"></div>
+    <div class="win-label" id="win-label"></div>
+    <div class="win-score" id="win-score"></div>
+    <div class="win-actions" id="win-actions"></div>
+  </div>
+</div>
+
+<!-- ════════ EDITOR MODAL ════════ -->
+<div id="editor-modal" class="modal-overlay" onclick="closeEditor()">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="editor-header">
+      <h2>تعديل الأسئلة</h2>
+      <div class="editor-actions">
+        <button class="btn-sm btn-danger" onclick="clearAllQuestions()">حذف الكل</button>
+        <button class="btn-close-editor" onclick="closeEditor()">✕</button>
+      </div>
+    </div>
+    <div class="editor-body">
+      <div class="letter-list" id="editor-letters"></div>
+      <div class="editor-content" id="editor-content"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+const ARABIC = ["أ","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","ه","و","ي"];
+const COLORS = [
+  {name:"سماوي",v:"#0ea5e9",g:"rgba(14,165,233,0.5)"},
+  {name:"أحمر",v:"#ef4444",g:"rgba(239,68,68,0.5)"},
+  {name:"أخضر",v:"#22c55e",g:"rgba(34,197,94,0.5)"},
+  {name:"بنفسجي",v:"#a855f7",g:"rgba(168,85,247,0.5)"},
+  {name:"برتقالي",v:"#f97316",g:"rgba(249,115,22,0.5)"},
+  {name:"وردي",v:"#ec4899",g:"rgba(236,72,153,0.5)"},
+  {name:"ذهبي",v:"#eab308",g:"rgba(234,179,8,0.5)"},
+  {name:"أزرق",v:"#3b82f6",g:"rgba(59,130,246,0.5)"},
+];
+const GRIDS = [{label:"4×4 صغير",cols:4,rows:4},{label:"5×5 كلاسيكي",cols:5,rows:5},{label:"6×6 كبير",cols:6,rows:6}];
+const ROUNDS = [{label:"جولة واحدة",val:1},{label:"أفضل من 3",val:3},{label:"أفضل من 5",val:5}];
+const HEX_SIZE = 50, SQRT3 = Math.sqrt(3);
+
+let S = {
+  team1Color:0, team2Color:1, gridIdx:1, roundIdx:1,
+  questions:{}, board:[], cols:5, rows:4,
+  currentTeam:0, // who buzzed in
+  roundWins:[0,0], moveHistory:[], usedQuestions:{},
+  winPath:null, selectedHex:null, currentQuestion:null,
+  isStealMode:false, stealHex:null, stealQuestion:null,
+  editorLetter:"أ", soundsReady:false, synth:null,
+  buzzedTeam: -1, // who buzzed in for current hex
+};
+
+const DEFAULT_Q = {
+  "أ":[{q:"ما هي أكبر قارة في العالم؟",a:"آسيا",cat:"جغرافيا"}],
+  "ب":[{q:"ما هي عاصمة البحرين؟",a:"المنامة",cat:"جغرافيا"}],
+  "ت":[{q:"ما هو أطول نهر في أفريقيا؟",a:"نهر النيل",cat:"جغرافيا"}],
+  "ث":[{q:"ما هي ثاني أكبر دولة عربية مساحة؟",a:"الجزائر",cat:"جغرافيا"}],
+  "ج":[{q:"ما هي عاصمة جورجيا؟",a:"تبليسي",cat:"جغرافيا"}],
+  "ح":[{q:"ما هو أكبر حيوان على وجه الأرض؟",a:"الحوت الأزرق",cat:"علوم"}],
+  "خ":[{q:"ما هي خامس أكبر دولة في العالم؟",a:"البرازيل",cat:"جغرافيا"}],
+  "د":[{q:"ما هي عاصمة الدنمارك؟",a:"كوبنهاغن",cat:"جغرافيا"}],
+  "ذ":[{q:"ما هو الذهب الأسود؟",a:"النفط",cat:"عام"}],
+  "ر":[{q:"ما هو أكبر كوكب في المجموعة الشمسية؟",a:"المشتري",cat:"علوم"}],
+  "ز":[{q:"ما هو لون الزمرد؟",a:"أخضر",cat:"عام"}],
+  "س":[{q:"كم عدد أسنان الإنسان البالغ؟",a:"32 سن",cat:"علوم"}],
+  "ش":[{q:"ما هي عاصمة الشيشان؟",a:"غروزني",cat:"جغرافيا"}],
+  "ص":[{q:"كم عدد صلوات الفرض في اليوم؟",a:"خمس صلوات",cat:"دين"}],
+  "ض":[{q:"ما هو لقب اللغة العربية؟",a:"لغة الضاد",cat:"لغة"}],
+  "ط":[{q:"ما هي عاصمة طاجيكستان؟",a:"دوشنبه",cat:"جغرافيا"}],
+  "ظ":[{q:"ما هو الحيوان المعروف بظهره المحدب؟",a:"الجمل",cat:"حيوانات"}],
+  "ع":[{q:"ما هي عاصمة العراق؟",a:"بغداد",cat:"جغرافيا"}],
+  "غ":[{q:"ما هي أكبر غابة في العالم؟",a:"غابة الأمازون",cat:"جغرافيا"}],
+  "ف":[{q:"ما هي عاصمة فرنسا؟",a:"باريس",cat:"جغرافيا"}],
+  "ق":[{q:"ما هي أصغر قارة في العالم؟",a:"أوقيانوسيا",cat:"جغرافيا"}],
+  "ك":[{q:"ما هي عاصمة كوريا الجنوبية؟",a:"سيول",cat:"جغرافيا"}],
+  "ل":[{q:"ما هي عاصمة لبنان؟",a:"بيروت",cat:"جغرافيا"}],
+  "م":[{q:"ما هي أكبر دولة عربية مساحة؟",a:"الجزائر",cat:"جغرافيا"}],
+  "ن":[{q:"ما هو أطول نهر في العالم؟",a:"نهر النيل",cat:"جغرافيا"}],
+  "ه":[{q:"ما هي عاصمة هولندا؟",a:"أمستردام",cat:"جغرافيا"}],
+  "و":[{q:"ما هي أكبر ولاية أمريكية؟",a:"ألاسكا",cat:"جغرافيا"}],
+  "ي":[{q:"ما هي عاصمة اليابان؟",a:"طوكيو",cat:"جغرافيا"}],
+};
+S.questions = JSON.parse(JSON.stringify(DEFAULT_Q));
+
+// ─── SOUNDS ───
+async function initSounds() {
+  if (S.soundsReady) return;
+  try {
+    await Tone.start();
+    S.synth = new Tone.PolySynth(Tone.Synth, {
+      maxPolyphony:8, options:{envelope:{attack:0.01,decay:0.2,sustain:0.1,release:0.3}}
+    }).toDestination();
+    S.synth.volume.value = -8;
+    S.soundsReady = true;
+  } catch(e) {}
+}
+async function playClaim() {
+  await initSounds(); if(!S.synth) return;
+  const n=Tone.now(); S.synth.triggerAttackRelease("E5","16n",n);
+  S.synth.triggerAttackRelease("G5","16n",n+0.08); S.synth.triggerAttackRelease("B5","16n",n+0.16);
+}
+async function playBuzzer() {
+  await initSounds();
+  const b=new Tone.Synth({oscillator:{type:"sawtooth"},envelope:{attack:0.01,decay:0.3,sustain:0,release:0.1}}).toDestination();
+  b.volume.value=-12; b.triggerAttackRelease("A2","8n"); setTimeout(()=>b.dispose(),1000);
+}
+async function playBuzzIn() {
+  await initSounds(); if(!S.synth) return;
+  const n=Tone.now(); S.synth.triggerAttackRelease("C5","16n",n); S.synth.triggerAttackRelease("E5","16n",n+0.06);
+}
+async function playWin() {
+  await initSounds(); if(!S.synth) return;
+  const n=Tone.now(); ["C5","E5","G5","C6"].forEach((note,i)=>S.synth.triggerAttackRelease(note,"8n",n+i*0.15));
+}
+async function playClick() {
+  await initSounds(); if(!S.synth) return; S.synth.triggerAttackRelease("G4","32n");
+}
+async function playMatchWin() {
+  await initSounds(); if(!S.synth) return;
+  const n=Tone.now(); ["C4","E4","G4","C5","E5","G5","C6"].forEach((note,i)=>S.synth.triggerAttackRelease(note,"8n",n+i*0.12));
+}
+
+// ─── SETUP ───
+function buildSetup() {
+  ["team1","team2"].forEach((tid,ti) => {
+    const el=document.getElementById(tid+"-colors"); el.innerHTML="";
+    COLORS.forEach((c,ci) => {
+      const sw=document.createElement("div");
+      sw.className="color-swatch"+(S[tid+"Color"]===ci?" selected":"");
+      sw.style.background=c.v;
+      sw.onclick=()=>{ S[tid+"Color"]=ci; buildSetup(); };
+      el.appendChild(sw);
+    });
+    document.getElementById(tid+"-group").style.borderColor=COLORS[S[tid+"Color"]].v+"33";
+  });
+  const go=document.getElementById("grid-options"); go.innerHTML="";
+  GRIDS.forEach((g,i)=>{
+    const btn=document.createElement("button");
+    btn.className="option-btn"+(S.gridIdx===i?" selected":"");
+    btn.textContent=g.label; btn.onclick=()=>{S.gridIdx=i;buildSetup();};
+    go.appendChild(btn);
+  });
+  const ro=document.getElementById("round-options"); ro.innerHTML="";
+  ROUNDS.forEach((r,i)=>{
+    const btn=document.createElement("button");
+    btn.className="option-btn"+(S.roundIdx===i?" selected":"");
+    btn.textContent=r.label; btn.onclick=()=>{S.roundIdx=i;buildSetup();};
+    ro.appendChild(btn);
+  });
+  updateQCount();
+}
+function updateQCount() {
+  const t=Object.values(S.questions).reduce((s,a)=>s+a.length,0);
+  document.getElementById("q-count-label").textContent=`الأسئلة (${t} سؤال)`;
+}
+function toggleTemplate() { document.getElementById("template-box").classList.toggle("visible"); }
+
+// ─── FILE IMPORT ───
+function handleFileImport(e) {
+  const file=e.target.files?.[0]; if(!file) return;
+  const msg=document.getElementById("import-msg");
+  msg.textContent="جاري الاستيراد..."; msg.style.color="#f5c842";
+  const ext=file.name.split(".").pop().toLowerCase();
+  if (ext==="csv"||ext==="tsv") {
+    Papa.parse(file,{header:true,skipEmptyLines:true,
+      complete:(r)=>mergeImported(normalizeRows(r.data),msg),
+      error:(err)=>{msg.textContent="✗ خطأ: "+err.message;msg.style.color="#ef4444";}});
+  } else if (ext==="xlsx"||ext==="xls") {
+    const reader=new FileReader();
+    reader.onload=(ev)=>{try{const wb=XLSX.read(ev.target.result,{type:"array"});
+      const ws=wb.Sheets[wb.SheetNames[0]]; mergeImported(normalizeRows(XLSX.utils.sheet_to_json(ws)),msg);
+    }catch(err){msg.textContent="✗ خطأ: "+err.message;msg.style.color="#ef4444";}};
+    reader.readAsArrayBuffer(file);
+  } else { msg.textContent="✗ نوع ملف غير مدعوم"; msg.style.color="#ef4444"; }
+  e.target.value="";
+}
+function normalizeRows(data) {
+  const m={}; data.forEach(r=>{
+    const l=(r["حرف"]||r["Letter"]||r["letter"]||"").trim();
+    const q=(r["سؤال"]||r["Question"]||r["question"]||"").trim();
+    const a=(r["إجابة"]||r["جواب"]||r["Answer"]||r["answer"]||"").trim();
+    const c=(r["تصنيف"]||r["Category"]||r["category"]||"").trim();
+    if(l&&q){if(!m[l])m[l]=[];m[l].push({q,a,cat:c});}
+  }); return m;
+}
+function mergeImported(qMap,msg) {
+  let count=0;
+  Object.entries(qMap).forEach(([l,qs])=>{
+    if(!S.questions[l])S.questions[l]=[];
+    S.questions[l].push(...qs); count+=qs.length;
+  });
+  msg.textContent=`✓ تم استيراد ${count} سؤال بنجاح`; msg.style.color="#22c55e";
+  updateQCount();
+}
+
+// ─── EDITOR ───
+function openEditor() { showModal("editor-modal"); renderEditor(); }
+function closeEditor() { hideModal("editor-modal"); updateQCount(); }
+function renderEditor() {
+  const ll=document.getElementById("editor-letters"); ll.innerHTML="";
+  ARABIC.forEach(l=>{
+    const btn=document.createElement("button");
+    btn.className="letter-btn"+(S.editorLetter===l?" selected":"")+((S.questions[l]?.length>0)?" has-q":"");
+    btn.innerHTML=l+'<span class="dot"></span>';
+    btn.onclick=()=>{S.editorLetter=l;renderEditor();}; ll.appendChild(btn);
+  });
+  const ec=document.getElementById("editor-content");
+  const qs=S.questions[S.editorLetter]||[];
+  ec.innerHTML=`<div class="editor-letter-title">أسئلة حرف «${S.editorLetter}» (${qs.length})</div>`;
+  qs.forEach((q,i)=>{
+    const d=document.createElement("div"); d.className="q-item";
+    d.innerHTML=`<div class="q-item-text"><div class="q-item-question">${q.q}</div>
+      <div class="q-item-answer">الإجابة: ${q.a||"—"}</div>
+      ${q.cat?`<div class="q-item-cat">التصنيف: ${q.cat}</div>`:""}</div>
+      <button class="q-item-del">حذف</button>`;
+    d.querySelector(".q-item-del").onclick=()=>{S.questions[S.editorLetter].splice(i,1);renderEditor();};
+    ec.appendChild(d);
+  });
+  const form=document.createElement("div"); form.className="add-q-form";
+  form.innerHTML=`<div class="form-label">إضافة سؤال جديد</div>
+    <input type="text" id="new-q" placeholder="السؤال..." dir="rtl">
+    <div class="add-q-row"><input type="text" id="new-a" placeholder="الإجابة..." dir="rtl">
+    <input type="text" id="new-cat" placeholder="التصنيف (اختياري)" dir="rtl"></div>
+    <button class="add-q-btn" id="add-q-btn">+ إضافة</button>`;
+  ec.appendChild(form);
+  document.getElementById("add-q-btn").onclick=()=>{
+    const t=document.getElementById("new-q").value.trim(); if(!t)return;
+    if(!S.questions[S.editorLetter])S.questions[S.editorLetter]=[];
+    S.questions[S.editorLetter].push({q:t,a:document.getElementById("new-a").value.trim(),cat:document.getElementById("new-cat").value.trim()});
+    renderEditor();
+  };
+}
+function clearAllQuestions() { if(!confirm("هل أنت متأكد من حذف جميع الأسئلة؟"))return; S.questions={}; renderEditor(); }
+
+// ─── HEX ───
+function hexCenter(c,r){return{x:c*HEX_SIZE*1.5,y:r*SQRT3*HEX_SIZE+(c%2===1?(SQRT3*HEX_SIZE)/2:0)};}
+function hexPoints(cx,cy,sz){return Array.from({length:6},(_,i)=>{const a=(Math.PI/3)*i;return`${cx+sz*Math.cos(a)},${cy+sz*Math.sin(a)}`;}).join(" ");}
+function getNeighbors(c,r,cols,rows){
+  const odd=c%2===1;
+  const off=odd?[[1,0],[1,1],[-1,0],[-1,1],[0,-1],[0,1]]:[[1,-1],[1,0],[-1,-1],[-1,0],[0,-1],[0,1]];
+  return off.map(([dc,dr])=>[c+dc,r+dr]).filter(([cc,rr])=>cc>=0&&cc<cols&&rr>=0&&rr<rows);
+}
+function checkWin(board,ti,cols,rows){
+  const key=(c,r)=>`${c},${r}`; const owned=new Set();
+  board.forEach(h=>{if(h.owner===ti)owned.add(key(h.col,h.row));});
+  let starts,isTarget;
+  if(ti===0){starts=board.filter(h=>h.col===0&&h.owner===0);isTarget=(c)=>c===cols-1;}
+  else{starts=board.filter(h=>h.row===0&&h.owner===1);isTarget=(_,r)=>r===rows-1;}
+  const visited=new Set();
+  const queue=starts.map(h=>({col:h.col,row:h.row,path:[key(h.col,h.row)]}));
+  starts.forEach(h=>visited.add(key(h.col,h.row)));
+  while(queue.length>0){
+    const{col,row,path}=queue.shift();
+    if(isTarget(col,row))return path;
+    for(const[nc,nr]of getNeighbors(col,row,cols,rows)){
+      const k=key(nc,nr);
+      if(owned.has(k)&&!visited.has(k)){visited.add(k);queue.push({col:nc,row:nr,path:[...path,k]});}
+    }
+  }
+  return null;
+}
+function generateBoard(cols,rows){
+  const count=cols*rows; const pool=[...ARABIC];
+  while(pool.length<count)pool.push(ARABIC[Math.floor(Math.random()*ARABIC.length)]);
+  const shuffled=pool.sort(()=>Math.random()-0.5).slice(0,count);
+  const board=[]; let idx=0;
+  for(let c=0;c<cols;c++)for(let r=0;r<rows;r++)board.push({col:c,row:r,letter:shuffled[idx++],owner:null});
+  return board;
+}
+
+// ─── GAME ───
+function getTeams(){return[
+  {name:document.getElementById("team1-name").value||"الفريق الأول",color:COLORS[S.team1Color]},
+  {name:document.getElementById("team2-name").value||"الفريق الثاني",color:COLORS[S.team2Color]},
+];}
+
+function startGame(){
+  const g=GRIDS[S.gridIdx]; S.cols=g.cols; S.rows=g.rows;
+  S.board=generateBoard(g.cols,g.rows);
+  S.currentTeam=0; S.roundWins=[0,0]; S.moveHistory=[]; S.usedQuestions={};
+  S.winPath=null; S.buzzedTeam=-1;
+  showScreen("game-screen"); renderGameUI(); renderBoard();
+}
+function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
+
+function renderGameUI(){
+  const teams=getTeams();
+  document.getElementById("name-team1").textContent=teams[0].name;
+  document.getElementById("name-team2").textContent=teams[1].name;
+  document.getElementById("dot-team1").style.background=teams[0].color.v;
+  document.getElementById("dot-team2").style.background=teams[1].color.v;
+  document.getElementById("score-team1").textContent=S.roundWins[0];
+  document.getElementById("score-team1").style.color=teams[0].color.v;
+  document.getElementById("score-team2").textContent=S.roundWins[1];
+  document.getElementById("score-team2").style.color=teams[1].color.v;
+  const bestOf=ROUNDS[S.roundIdx].val;
+  document.getElementById("best-of-label").textContent=bestOf>1?`أفضل من ${bestOf}`:"";
+
+  // Both badges are neutral (no "active turn" since buzzer decides)
+  [0,1].forEach(i=>{
+    const badge=document.getElementById(`badge-team${i+1}`);
+    const dot=document.getElementById(`dot-team${i+1}`);
+    const name=document.getElementById(`name-team${i+1}`);
+    badge.classList.remove("active");
+    badge.style.background="rgba(255,255,255,0.03)";
+    badge.style.borderColor=getTeams()[i].color.v+"44";
+    dot.style.boxShadow=`0 0 8px ${getTeams()[i].color.g}`;
+    name.style.color=getTeams()[i].color.v;
+  });
+}
+
+function borderHexCenter(c,r){
+  // Handles negative col offsets correctly for hex grid
+  const isOdd = ((c % 2) + 2) % 2 === 1;
+  return {
+    x: c * HEX_SIZE * 1.5,
+    y: r * SQRT3 * HEX_SIZE + (isOdd ? (SQRT3 * HEX_SIZE) / 2 : 0),
+  };
+}
+
+function renderBoard(){
+  const teams=getTeams(); const svg=document.getElementById("board-svg");
+  const padding = HEX_SIZE * 2 + 10;
+  const hexes=S.board.map(h=>({...h,...hexCenter(h.col,h.row)}));
+
+  // Compute border hex positions first so we include them in viewBox
+  const borderHexes = [];
+
+  // Team 1 (← →): LEFT col=-1, RIGHT col=cols
+  for(let r=0; r<S.rows; r++){
+    const leftPos = borderHexCenter(-1, r);
+    borderHexes.push({...leftPos, team:0});
+    const rightPos = borderHexCenter(S.cols, r);
+    borderHexes.push({...rightPos, team:0});
+  }
+  // Team 2 (↑ ↓): TOP row=-1, BOTTOM row=rows
+  for(let c=0; c<S.cols; c++){
+    const topPos = borderHexCenter(c, -1);
+    borderHexes.push({...topPos, team:1});
+    const botPos = borderHexCenter(c, S.rows);
+    borderHexes.push({...botPos, team:1});
+  }
+
+  const allX = [...hexes.map(h=>h.x), ...borderHexes.map(h=>h.x)];
+  const allY = [...hexes.map(h=>h.y), ...borderHexes.map(h=>h.y)];
+  const minX=Math.min(...allX)-HEX_SIZE-10, maxX=Math.max(...allX)+HEX_SIZE+10;
+  const minY=Math.min(...allY)-HEX_SIZE-10, maxY=Math.max(...allY)+HEX_SIZE+10;
+  svg.setAttribute("viewBox",`${minX} ${minY} ${maxX-minX} ${maxY-minY}`);
+  svg.style.maxHeight="calc(100vh - 170px)";
+
+  let html=`<defs>`;
+  teams.forEach((t,i)=>{
+    html+=`<filter id="glow-${i}"><feGaussianBlur stdDeviation="4" result="b"/>
+    <feFlood flood-color="${t.color.v}" flood-opacity="0.6"/><feComposite in2="b" operator="in"/>
+    <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+    html+=`<filter id="bglow-${i}"><feGaussianBlur stdDeviation="3" result="b"/>
+    <feFlood flood-color="${t.color.v}" flood-opacity="0.35"/><feComposite in2="b" operator="in"/>
+    <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+  });
+  html+=`<linearGradient id="hg" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#e8e8f0"/>
+  </linearGradient>
+  <filter id="hs"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15"/></filter></defs>`;
+
+  // ─── BORDER HEXAGONS (drawn first, behind main board) ───
+  borderHexes.forEach(bh=>{
+    const color = teams[bh.team].color.v;
+    html+=`<polygon points="${hexPoints(bh.x,bh.y,HEX_SIZE)}" fill="${color}" stroke="${color}" stroke-width="1.5" opacity="0.9" filter="url(#bglow-${bh.team})"/>`;
+  });
+
+  // ─── MAIN BOARD HEXAGONS ───
+  hexes.forEach(hex=>{
+    const isOwned=hex.owner!==null;
+    const hexKey=`${hex.col},${hex.row}`;
+    const isWin=S.winPath?.includes(hexKey);
+    const fill=isOwned?teams[hex.owner].color.v:"url(#hg)";
+    const stroke=isOwned?teams[hex.owner].color.v:"#c8c8d8";
+    const textColor=isOwned?"#fff":"#1a1a2e";
+    const filterAttr=isOwned?`filter="url(#glow-${hex.owner})"`:'filter="url(#hs)"';
+    html+=`<g class="hex-cell ${isOwned?"owned":""} ${isWin?"win-path":""}" ${filterAttr}
+      onclick="onHexClick(${hex.col},${hex.row})"
+      onmouseenter="onHexHover(this,true,${isOwned})" onmouseleave="onHexHover(this,false,${isOwned})">
+      <polygon class="hex-poly" points="${hexPoints(hex.x,hex.y,HEX_SIZE)}" fill="${fill}" stroke="${stroke}"/>
+      <text class="hex-text" x="${hex.x}" y="${hex.y}" fill="${textColor}" font-size="${HEX_SIZE*0.7}">${hex.letter}</text></g>`;
+  });
+  svg.innerHTML=html;
+  document.getElementById("undo-btn").disabled=S.moveHistory.length===0;
+}
+function onHexHover(g,entering,isOwned){
+  if(isOwned)return; const p=g.querySelector(".hex-poly");
+  if(entering){p.setAttribute("stroke","#f5c842");p.setAttribute("stroke-width","3");}
+  else{p.setAttribute("stroke","#c8c8d8");p.setAttribute("stroke-width","2");}
+}
+
+// ─── BUZZER FLOW ───
+function onHexClick(col,row){
+  const hex=S.board.find(h=>h.col===col&&h.row===row);
+  if(!hex||hex.owner!==null||S.winPath)return;
+  playClick();
+
+  const qs=S.questions[hex.letter];
+  if(!qs||qs.length===0){alert(`لا توجد أسئلة لحرف "${hex.letter}". يرجى إضافة أسئلة أولاً.`);return;}
+
+  // Pick question
+  const used=S.usedQuestions[hex.letter]||[];
+  const available=qs.map((q,i)=>({q,i})).filter(x=>!used.includes(x.i));
+  let pick;
+  if(available.length>0){
+    pick=available[Math.floor(Math.random()*available.length)];
+    if(!S.usedQuestions[hex.letter])S.usedQuestions[hex.letter]=[];
+    S.usedQuestions[hex.letter].push(pick.i);
+  } else { pick={q:qs[Math.floor(Math.random()*qs.length)]}; }
+
+  S.selectedHex=hex; S.currentQuestion=pick.q;
+  S.isStealMode=false; S.buzzedTeam=-1;
+
+  // Show buzzer modal
+  showBuzzerModal();
+}
+
+function showBuzzerModal(){
+  const teams=getTeams();
+  document.getElementById("buzzer-letter").textContent=S.selectedHex.letter;
+
+  const btn1=document.getElementById("buzzer-btn-1");
+  const btn2=document.getElementById("buzzer-btn-2");
+  document.getElementById("buzzer-name-1").textContent=teams[0].name;
+  document.getElementById("buzzer-name-2").textContent=teams[1].name;
+  btn1.style.background=`linear-gradient(135deg, ${teams[0].color.v}, ${teams[0].color.v}cc)`;
+  btn1.style.boxShadow=`0 8px 30px ${teams[0].color.g}`;
+  btn2.style.background=`linear-gradient(135deg, ${teams[1].color.v}, ${teams[1].color.v}cc)`;
+  btn2.style.boxShadow=`0 8px 30px ${teams[1].color.g}`;
+
+  showModal("buzzer-modal");
+}
+
+function buzzIn(teamIdx){
+  playBuzzIn();
+  S.buzzedTeam=teamIdx;
+  S.currentTeam=teamIdx;
+  hideModal("buzzer-modal");
+  showQuestionModal();
+}
+
+function skipBuzzer(){
+  hideModal("buzzer-modal");
+  S.selectedHex=null; S.currentQuestion=null;
+}
+
+// ─── QUESTION MODAL ───
+function showQuestionModal(){
+  const teams=getTeams();
+  const activeIdx=S.isStealMode?(1-S.buzzedTeam):S.buzzedTeam;
+  const team=teams[activeIdx]; const hex=S.selectedHex; const q=S.currentQuestion;
+
+  document.getElementById("q-letter-box").textContent=hex.letter;
+  document.getElementById("q-letter-box").style.background=team.color.v;
+  document.getElementById("q-header").style.background=`linear-gradient(135deg, ${team.color.v}22, transparent)`;
+  document.getElementById("q-header").style.borderBottom=`1px solid ${team.color.v}33`;
+  document.getElementById("q-team-name").textContent=team.name;
+  document.getElementById("q-team-name").style.color=team.color.v;
+  document.getElementById("q-steal-badge").style.display=S.isStealMode?"block":"none";
+  document.getElementById("q-category").textContent=q.cat?`التصنيف: ${q.cat}`:"";
+  document.getElementById("q-text").textContent=q.q;
+  document.getElementById("q-answer-text").textContent=q.a||"لا توجد إجابة محددة";
+  document.getElementById("q-answer-wrap").classList.remove("visible");
+  document.getElementById("q-reveal-btn").style.display="";
+  showModal("question-modal");
+}
+function revealAnswer(){
+  document.getElementById("q-answer-wrap").classList.add("visible");
+  document.getElementById("q-reveal-btn").style.display="none";
+}
+function closeQuestionModal(){
+  hideModal("question-modal");
+  S.selectedHex=null; S.currentQuestion=null;
+  S.isStealMode=false; S.stealHex=null; S.stealQuestion=null;
+}
+
+function handleCorrect(){
+  const teamIdx=S.isStealMode?(1-S.buzzedTeam):S.buzzedTeam;
+  playClaim();
+  const hex=S.selectedHex; hex.owner=teamIdx;
+  S.moveHistory.push({col:hex.col,row:hex.row,team:teamIdx});
+  hideModal("question-modal");
+  S.isStealMode=false; S.stealHex=null; S.stealQuestion=null;
+  renderBoard();
+
+  const path=checkWin(S.board,teamIdx,S.cols,S.rows);
+  if(path){
+    S.winPath=path; renderBoard(); playWin();
+    S.roundWins[teamIdx]++; renderGameUI();
+    const bestOf=ROUNDS[S.roundIdx].val;
+    const winsNeeded=Math.ceil(bestOf/2);
+    const isMatch=S.roundWins[teamIdx]>=winsNeeded;
+    setTimeout(()=>{if(isMatch)playMatchWin();showWinModal(teamIdx,isMatch);},800);
+  }
+  S.selectedHex=null; S.currentQuestion=null;
+}
+
+function handleWrong(){
+  playBuzzer();
+  if(!S.isStealMode){
+    S.stealHex=S.selectedHex; S.stealQuestion=S.currentQuestion;
+    hideModal("question-modal"); showStealPrompt();
+  } else {
+    hideModal("question-modal");
+    S.isStealMode=false; S.stealHex=null; S.stealQuestion=null;
+    S.selectedHex=null; S.currentQuestion=null;
+  }
+}
+
+// ─── STEAL ───
+function showStealPrompt(){
+  const teams=getTeams(); const stealIdx=1-S.buzzedTeam;
+  document.getElementById("steal-team-name").textContent=teams[stealIdx].name;
+  document.getElementById("steal-team-name").style.color=teams[stealIdx].color.v;
+  document.getElementById("steal-yes-btn").style.background=teams[stealIdx].color.v;
+  document.getElementById("steal-modal").querySelector(".modal-card").style.border=`2px solid ${teams[stealIdx].color.v}44`;
+  showModal("steal-modal");
+}
+function acceptSteal(){
+  hideModal("steal-modal");
+  S.isStealMode=true; S.selectedHex=S.stealHex; S.currentQuestion=S.stealQuestion;
+  showQuestionModal();
+}
+function declineSteal(){
+  hideModal("steal-modal");
+  S.isStealMode=false; S.stealHex=null; S.stealQuestion=null;
+  S.selectedHex=null; S.currentQuestion=null;
+}
+
+// ─── WIN ───
+function showWinModal(winnerIdx,isMatchEnd){
+  const teams=getTeams();
+  document.getElementById("win-icon").textContent=isMatchEnd?"🏆":"🎉";
+  document.getElementById("win-team-name").textContent=teams[winnerIdx].name;
+  document.getElementById("win-team-name").style.color=teams[winnerIdx].color.v;
+  document.getElementById("win-team-name").style.textShadow=`0 0 40px ${teams[winnerIdx].color.g}`;
+  document.getElementById("win-label").textContent=isMatchEnd?"فاز بالمباراة!":"فاز بالجولة!";
+  document.getElementById("win-score").innerHTML=`النتيجة: <span class="win-score-num" style="color:${teams[0].color.v}">${S.roundWins[0]}</span> - <span class="win-score-num" style="color:${teams[1].color.v}">${S.roundWins[1]}</span>`;
+  let a="";
+  if(!isMatchEnd)a+=`<button class="win-btn-primary" onclick="nextRound()">الجولة التالية ▶</button>`;
+  a+=`<button class="${isMatchEnd?'win-btn-primary':'win-btn-secondary'}" onclick="newMatch()">مباراة جديدة</button>`;
+  a+=`<button class="win-btn-ghost" onclick="goToSetup()">الإعدادات</button>`;
+  document.getElementById("win-actions").innerHTML=a;
+  showModal("win-modal");
+}
+function nextRound(){
+  hideModal("win-modal"); S.winPath=null;
+  S.board=generateBoard(S.cols,S.rows); S.currentTeam=0; S.moveHistory=[];
+  renderBoard();
+}
+function newMatch(){
+  hideModal("win-modal"); S.roundWins=[0,0]; S.winPath=null;
+  S.board=generateBoard(S.cols,S.rows); S.currentTeam=0;
+  S.moveHistory=[]; S.usedQuestions={}; renderGameUI(); renderBoard();
+}
+
+// ─── TOOLBAR ───
+function regenerateBoard(){
+  S.board=generateBoard(S.cols,S.rows); S.currentTeam=0;
+  S.moveHistory=[]; S.winPath=null;
+  const w=document.getElementById("board-wrapper");
+  w.style.animation="none"; w.offsetHeight; w.style.animation="fadeInUp 0.5s ease-out";
+  renderBoard();
+}
+function undoMove(){
+  if(S.moveHistory.length===0)return;
+  const last=S.moveHistory.pop();
+  const hex=S.board.find(h=>h.col===last.col&&h.row===last.row);
+  if(hex)hex.owner=null; S.winPath=null; renderBoard();
+}
+function goToSetup(){ hideModal("win-modal"); showScreen("setup-screen"); buildSetup(); }
+function toggleFullscreen(){
+  if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+}
+
+// ─── MODAL HELPERS ───
+function showModal(id){const el=document.getElementById(id);el.style.display="flex";requestAnimationFrame(()=>el.classList.add("visible"));}
+function hideModal(id){const el=document.getElementById(id);el.classList.remove("visible");setTimeout(()=>{el.style.display="none";},300);}
+
+// ─── INIT ───
+buildSetup();
+</script>
+</body>
+</html>
