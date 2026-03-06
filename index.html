@@ -42,7 +42,7 @@ body{font-family:'Tajawal',sans-serif;background:linear-gradient(135deg,#0a0e27 
 </style>
 </head>
 <body>
-<div id="setup-screen" class="screen active"><div class="setup-card"><div class="setup-title"><h1>حروف مع أنس</h1><p>لعبة الحروف لفريقين</p></div><div class="form-row"><div class="form-group" id="team1-group"><label>الفريق الأول (← →)</label><input type="text" id="team1-name" value="الفريق الأول"><div class="color-palette" id="team1-colors"></div><div class="team-dir-hint">يربط اليسار باليمين</div></div><div class="form-group" id="team2-group"><label>الفريق الثاني (↑ ↓)</label><input type="text" id="team2-name" value="الفريق الثاني"><div class="color-palette" id="team2-colors"></div><div class="team-dir-hint">يربط الأعلى بالأسفل</div></div></div><div class="form-row"><div><label style="color:#8892b0;font-size:12px;display:block;margin-bottom:6px">حجم اللوحة (N×N)</label><div class="option-group" id="grid-options"></div></div><div><label style="color:#8892b0;font-size:12px;display:block;margin-bottom:6px">عدد الجولات</label><div class="option-group" id="round-options"></div></div></div><div class="questions-section"><div class="questions-header"><span id="q-count-label">الأسئلة</span><div style="display:flex;gap:8px"><button class="btn-sm btn-gold" onclick="openEditor()">تعديل الأسئلة</button><button class="btn-sm btn-ghost" onclick="toggleTemplate()">القالب</button></div></div><div class="template-box" id="template-box"><div class="label">CSV / Excel columns:</div><div>حرف, سؤال, إجابة, تصنيف</div></div><div><input type="file" id="file-input" accept=".csv,.tsv,.xlsx,.xls" style="display:none" onchange="handleFileImport(event)"><button class="import-btn" onclick="document.getElementById('file-input').click()">📁 استيراد من ملف CSV / Excel</button></div><div class="import-msg" id="import-msg"></div></div><button class="start-btn" onclick="startGame()">ابدأ اللعبة ⬡</button></div></div>
+<div id="setup-screen" class="screen active"><div class="setup-card"><div class="setup-title"><h1>حروف مع أنس</h1><p>لعبة الحروف لفريقين</p></div><div class="form-row"><div class="form-group" id="team1-group"><label>الفريق الأول (← →)</label><input type="text" id="team1-name" value="الفريق الأول"><div class="color-palette" id="team1-colors"></div><div class="team-dir-hint">يربط اليسار باليمين</div></div><div class="form-group" id="team2-group"><label>الفريق الثاني (↑ ↓)</label><input type="text" id="team2-name" value="الفريق الثاني"><div class="color-palette" id="team2-colors"></div><div class="team-dir-hint">يربط الأعلى بالأسفل</div></div></div><div class="form-row"><div><label style="color:#8892b0;font-size:12px;display:block;margin-bottom:6px">حجم اللوحة</label><div class="option-group" id="grid-options"></div></div><div><label style="color:#8892b0;font-size:12px;display:block;margin-bottom:6px">عدد الجولات</label><div class="option-group" id="round-options"></div></div></div><div class="questions-section"><div class="questions-header"><span id="q-count-label">الأسئلة</span><div style="display:flex;gap:8px"><button class="btn-sm btn-gold" onclick="openEditor()">تعديل الأسئلة</button><button class="btn-sm btn-ghost" onclick="toggleTemplate()">القالب</button></div></div><div class="template-box" id="template-box"><div class="label">CSV / Excel columns:</div><div>حرف, سؤال, إجابة, تصنيف</div></div><div><input type="file" id="file-input" accept=".csv,.tsv,.xlsx,.xls" style="display:none" onchange="handleFileImport(event)"><button class="import-btn" onclick="document.getElementById('file-input').click()">📁 استيراد من ملف CSV / Excel</button></div><div class="import-msg" id="import-msg"></div></div><button class="start-btn" onclick="startGame()">ابدأ اللعبة ⬡</button></div></div>
 <div id="game-screen" class="screen"><div class="top-bar"><div class="team-badge" id="badge-team1"><div class="team-dot" id="dot-team1"></div><span class="team-name" id="name-team1"></span><span class="team-dir-label">← →</span></div><div class="score-center"><div class="score-box"><span class="score-num" id="score-team1">0</span><span class="score-sep">—</span><span class="score-num" id="score-team2">0</span></div><span class="best-of-label" id="best-of-label"></span></div><div class="team-badge" id="badge-team2"><span class="team-dir-label">↑ ↓</span><span class="team-name" id="name-team2"></span><div class="team-dot" id="dot-team2"></div></div></div><div class="board-area"><div class="board-wrapper" id="board-wrapper"><svg id="board-svg" class="board-svg"></svg></div></div><div class="bottom-toolbar"><button class="tool-btn" onclick="goToSetup()">⚙️ الإعدادات</button><button class="tool-btn" onclick="regenerateBoard()">🔀 تبديل الحروف</button><button class="tool-btn" id="undo-btn" onclick="undoMove()" disabled>↩️ تراجع</button><button class="tool-btn" onclick="toggleFullscreen()">🔳 ملء الشاشة</button><button class="tool-btn" onclick="newMatch()">🔄 مباراة جديدة</button></div></div>
 <div id="question-modal" class="modal-overlay" onclick="closeQM()"><div class="modal-card" onclick="event.stopPropagation()"><div class="q-header" id="q-header"><div style="display:flex;align-items:center;gap:12px"><div class="q-letter-box" id="q-letter-box"></div><div class="q-info"><div class="q-letter-label" id="q-letter-label"></div><div class="q-category" id="q-category"></div></div></div><button class="q-close-btn" onclick="closeQM()">✕</button></div><div class="q-body"><div class="q-text" id="q-text"></div></div><div class="q-answer-wrap" id="q-answer-wrap"><div class="q-answer-box"><div class="q-answer-label">الإجابة</div><div class="q-answer-text" id="q-answer-text"></div></div></div><div class="q-actions"><button class="q-btn q-btn-reveal" id="q-reveal-btn" onclick="revealAns()">👁 إظهار الإجابة</button><button class="q-btn q-btn-correct" onclick="handleOK()">✓ صحيحة</button><button class="q-btn q-btn-wrong" onclick="handleNo()">✗ خاطئة</button></div></div></div>
 <div id="team-pick-modal" class="modal-overlay"><div class="modal-card" onclick="event.stopPropagation()"><div class="pick-title">✓ إجابة صحيحة!</div><div class="pick-subtitle">اختر الفريق الذي أجاب:</div><div class="pick-buttons"><button class="pick-btn" id="pick-btn-1" onclick="assign(0)"><span id="pick-name-1"></span><span class="pick-sub">← →</span></button><button class="pick-btn" id="pick-btn-2" onclick="assign(1)"><span id="pick-name-2"></span><span class="pick-sub">↑ ↓</span></button></div></div></div>
@@ -51,15 +51,11 @@ body{font-family:'Tajawal',sans-serif;background:linear-gradient(135deg,#0a0e27 
 <script>
 const AR=["أ","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","ه","و","ي"];
 const COL=[{n:"سماوي",v:"#0ea5e9",g:"rgba(14,165,233,0.5)"},{n:"أحمر",v:"#ef4444",g:"rgba(239,68,68,0.5)"},{n:"أخضر",v:"#22c55e",g:"rgba(34,197,94,0.5)"},{n:"بنفسجي",v:"#a855f7",g:"rgba(168,85,247,0.5)"},{n:"برتقالي",v:"#f97316",g:"rgba(249,115,22,0.5)"},{n:"وردي",v:"#ec4899",g:"rgba(236,72,153,0.5)"},{n:"ذهبي",v:"#eab308",g:"rgba(234,179,8,0.5)"},{n:"أزرق",v:"#3b82f6",g:"rgba(59,130,246,0.5)"}];
-const GRIDS=[4,5,6,7,8];
-const RNDS=[{l:"جولة",v:1},{l:"من 3",v:3},{l:"من 5",v:5}];
+const GRIDS=[4,5,6,7,8];const RNDS=[{l:"جولة",v:1},{l:"من 3",v:3},{l:"من 5",v:5}];
 const S3=Math.sqrt(3);
-// Flat-top hex: axial neighbors
-const NB=[[1,0],[-1,0],[0,1],[0,-1],[1,-1],[-1,1]];
 let G={t1c:0,t2c:1,gi:1,ri:0,qs:{},board:[],N:5,rw:[0,0],hist:[],used:{},wp:null,sel:null,cq:null,el:"أ",snd:false,syn:null};
 const DQ={};AR.forEach(l=>{DQ[l]=[{q:"سؤال حرف "+l,a:"إجابة "+l,cat:"عام"}]});G.qs=JSON.parse(JSON.stringify(DQ));
 
-// === SOUNDS ===
 async function initS(){if(G.snd)return;try{await Tone.start();G.syn=new Tone.PolySynth(Tone.Synth,{maxPolyphony:8,options:{envelope:{attack:.01,decay:.2,sustain:.1,release:.3}}}).toDestination();G.syn.volume.value=-8;G.snd=true}catch(e){}}
 async function sC(){await initS();if(!G.syn)return;const n=Tone.now();G.syn.triggerAttackRelease("E5","16n",n);G.syn.triggerAttackRelease("G5","16n",n+.08);G.syn.triggerAttackRelease("B5","16n",n+.16)}
 async function sB(){await initS();const b=new Tone.Synth({oscillator:{type:"sawtooth"},envelope:{attack:.01,decay:.3,sustain:0,release:.1}}).toDestination();b.volume.value=-12;b.triggerAttackRelease("A2","8n");setTimeout(()=>b.dispose(),1e3)}
@@ -67,46 +63,72 @@ async function sW(){await initS();if(!G.syn)return;const n=Tone.now();["C5","E5"
 async function sK(){await initS();if(!G.syn)return;G.syn.triggerAttackRelease("G4","32n")}
 async function sM(){await initS();if(!G.syn)return;const n=Tone.now();["C4","E4","G4","C5","E5","G5","C6"].forEach((x,i)=>G.syn.triggerAttackRelease(x,"8n",n+i*.12))}
 
-// === FLAT-TOP HEX MATH ===
-// Axial coordinates (q=col, r=row)
-// Pixel: x = sz * 3/2 * q, y = sz * S3 * (r + q*0.5)
-function cPos(q,r,sz){return{x:sz*1.5*q, y:sz*S3*(r+q*0.5)}}
-// Flat-top hex vertices: angles 0,60,120,180,240,300
-function hPts(cx,cy,sz){return Array.from({length:6},(_,i)=>{const a=Math.PI/3*i;return(cx+sz*Math.cos(a))+","+(cy+sz*Math.sin(a))}).join(" ")}
-function inB(q,r,N){return q>=0&&q<N&&r>=0&&r<N}
+/*
+  FLAT-TOP HEX with OFFSET COORDINATES
+  col = column (0..N-1), row = row (0..N-1)
+  Odd columns shift DOWN by half a hex height.
+  
+  Pixel position:
+    x = sz * 1.5 * col
+    y = sz * S3 * (row + 0.5 * (col % 2))
+    
+  This gives a STRAIGHT RECTANGULAR grid shape.
+  
+  Flat-top hex vertices: angle = 60° * i (i=0..5)
+*/
+function cPos(col,row,sz){
+  return {x: sz*1.5*col, y: sz*S3*(row + 0.5*(col%2))};
+}
+function hPts(cx,cy,sz){
+  return Array.from({length:6},(_,i)=>{const a=Math.PI/3*i;return(cx+sz*Math.cos(a))+","+(cy+sz*Math.sin(a))}).join(" ");
+}
 
-// Win: Team0(←→) connects q=0→q=N-1, Team1(↑↓) connects r=0→r=N-1
+// Neighbors for flat-top offset coords (odd-col shift down)
+function nbs(col,row){
+  const odd=col%2===1;
+  const offsets=odd
+    ?[[1,0],[1,1],[-1,0],[-1,1],[0,-1],[0,1]]
+    :[[1,-1],[1,0],[-1,-1],[-1,0],[0,-1],[0,1]];
+  return offsets.map(([dc,dr])=>({c:col+dc,r:row+dr}));
+}
+
+// Win: Team0(←→) col=0→col=N-1, Team1(↑↓) row=0→row=N-1
 function checkWin(board,ti,N){
-  const k=(q,r)=>q+","+r;const own=new Set(board.filter(c=>c.o===ti).map(c=>k(c.q,c.r)));
-  const sF=ti===0?(q,r)=>q===0:(q,r)=>r===0;
-  const eF=ti===0?(q,r)=>q===N-1:(q,r)=>r===N-1;
-  const starts=board.filter(c=>c.o===ti&&sF(c.q,c.r));
-  const vis=new Set(),queue=starts.map(c=>({q:c.q,r:c.r,p:[k(c.q,c.r)]}));
-  starts.forEach(c=>vis.add(k(c.q,c.r)));
-  while(queue.length){const cur=queue.shift();if(eF(cur.q,cur.r))return cur.p;
-    for(const[dq,dr]of NB){const nq=cur.q+dq,nr=cur.r+dr,nk=k(nq,nr);
-      if(own.has(nk)&&!vis.has(nk)){vis.add(nk);queue.push({q:nq,r:nr,p:[...cur.p,nk]})}}}
+  const k=(c,r)=>c+","+r;
+  const own=new Set(board.filter(h=>h.o===ti).map(h=>k(h.c,h.r)));
+  const sF=ti===0?(c,r)=>c===0:(c,r)=>r===0;
+  const eF=ti===0?(c,r)=>c===N-1:(c,r)=>r===N-1;
+  const starts=board.filter(h=>h.o===ti&&sF(h.c,h.r));
+  const vis=new Set(),queue=starts.map(h=>({c:h.c,r:h.r,p:[k(h.c,h.r)]}));
+  starts.forEach(h=>vis.add(k(h.c,h.r)));
+  while(queue.length){
+    const cur=queue.shift();if(eF(cur.c,cur.r))return cur.p;
+    for(const n of nbs(cur.c,cur.r)){
+      const nk=k(n.c,n.r);
+      if(own.has(nk)&&!vis.has(nk)){vis.add(nk);queue.push({c:n.c,r:n.r,p:[...cur.p,nk]})}
+    }
+  }
   return null;
 }
+
 function genBoard(N){
-  const cells=[];for(let q=0;q<N;q++)for(let r=0;r<N;r++)cells.push({q,r,o:null});
+  const cells=[];for(let c=0;c<N;c++)for(let r=0;r<N;r++)cells.push({c,r,o:null});
   const pool=[...AR];while(pool.length<cells.length)pool.push(AR[Math.floor(Math.random()*AR.length)]);
-  const sh=pool.sort(()=>Math.random()-.5);cells.forEach((c,i)=>c.l=sh[i%sh.length]);return cells;
+  const sh=pool.sort(()=>Math.random()-.5);cells.forEach((h,i)=>h.l=sh[i%sh.length]);return cells;
 }
 
-// Borders: same-size hexes along each edge, tightly fitted
+// Border hexes - same size, tightly fitting
 function getBorders(N){
   const bs=[];
-  // Team0 (←→): left q=-1 and right q=N
-  for(let r=0;r<N;r++){bs.push({q:-1,r,t:0});bs.push({q:N,r,t:0})}
-  // Team1 (↑↓): top r=-1 and bottom r=N
-  for(let q=0;q<N;q++){bs.push({q,r:-1,t:1});bs.push({q,r:N,t:1})}
+  // Team0 (←→): left col=-1 and right col=N
+  for(let r=0;r<N;r++){bs.push({c:-1,r,t:0});bs.push({c:N,r,t:0})}
+  // Team1 (↑↓): top row=-1 and bottom row=N
+  for(let c=0;c<N;c++){bs.push({c,r:-1,t:1});bs.push({c,r:N,t:1})}
   return bs;
 }
 
 function tm(){return[{n:document.getElementById("team1-name").value||"الفريق الأول",c:COL[G.t1c]},{n:document.getElementById("team2-name").value||"الفريق الثاني",c:COL[G.t2c]}]}
 
-// === SETUP ===
 function buildSetup(){
   ["team1","team2"].forEach((tid,ti)=>{const el=document.getElementById(tid+"-colors");el.innerHTML="";const ck=ti===0?"t1c":"t2c";COL.forEach((c,ci)=>{const sw=document.createElement("div");sw.className="color-swatch"+(G[ck]===ci?" selected":"");sw.style.background=c.v;sw.onclick=()=>{G[ck]=ci;buildSetup()};el.appendChild(sw)});document.getElementById(tid+"-group").style.borderColor=COL[G[ck]].v+"33"});
   const go=document.getElementById("grid-options");go.innerHTML="";GRIDS.forEach((n,i)=>{const b=document.createElement("button");b.className="option-btn"+(G.gi===i?" selected":"");b.textContent=n+"×"+n;b.onclick=()=>{G.gi=i;buildSetup()};go.appendChild(b)});
@@ -121,22 +143,24 @@ function openEditor(){showM("editor-modal");renderEd()}function closeEditor(){hi
 function renderEd(){const ll=document.getElementById("editor-letters");ll.innerHTML="";AR.forEach(l=>{const b=document.createElement("button");b.className="letter-btn"+(G.el===l?" selected":"")+((G.qs[l]?.length>0)?" has-q":"");b.innerHTML=l+'<span class="dot"></span>';b.onclick=()=>{G.el=l;renderEd()};ll.appendChild(b)});const ec=document.getElementById("editor-content");const qs=G.qs[G.el]||[];ec.innerHTML='<div class="editor-letter-title">أسئلة «'+G.el+'» ('+qs.length+')</div>';qs.forEach((q,i)=>{const d=document.createElement("div");d.className="q-item";d.innerHTML='<div class="q-item-text"><div class="q-item-question">'+q.q+'</div><div class="q-item-answer">الإجابة: '+(q.a||"—")+'</div>'+(q.cat?'<div class="q-item-cat">'+q.cat+'</div>':'')+'</div><button class="q-item-del">حذف</button>';d.querySelector(".q-item-del").onclick=()=>{G.qs[G.el].splice(i,1);renderEd()};ec.appendChild(d)});const fm=document.createElement("div");fm.className="add-q-form";fm.innerHTML='<div class="form-label">إضافة سؤال</div><input type="text" id="new-q" placeholder="السؤال..." dir="rtl"><div class="add-q-row"><input type="text" id="new-a" placeholder="الإجابة..." dir="rtl"><input type="text" id="new-cat" placeholder="التصنيف" dir="rtl"></div><button class="add-q-btn" id="add-q-btn">+ إضافة</button>';ec.appendChild(fm);document.getElementById("add-q-btn").onclick=()=>{const t=document.getElementById("new-q").value.trim();if(!t)return;if(!G.qs[G.el])G.qs[G.el]=[];G.qs[G.el].push({q:t,a:document.getElementById("new-a").value.trim(),cat:document.getElementById("new-cat").value.trim()});renderEd()}}
 function clearAllQ(){if(!confirm("حذف جميع الأسئلة؟"))return;G.qs={};renderEd()}
 
-// === GAME ===
-function startGame(){G.N=GRIDS[G.gi];G.board=genBoard(G.N);G.rw=[0,0];G.hist=[];G.used={};G.wp=null;G.sel=null;G.cq=null;showScr("game-screen");renderUI();renderBoard()}
+function startGame(){G.N=GRIDS[G.gi];G.board=genBoard(G.N);G.rw=[0,0];G.hist=[];G.used={};G.wp=null;showScr("game-screen");renderUI();renderBoard()}
 function showScr(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active")}
 function renderUI(){const t=tm();document.getElementById("name-team1").textContent=t[0].n;document.getElementById("name-team2").textContent=t[1].n;document.getElementById("dot-team1").style.background=t[0].c.v;document.getElementById("dot-team2").style.background=t[1].c.v;document.getElementById("score-team1").textContent=G.rw[0];document.getElementById("score-team1").style.color=t[0].c.v;document.getElementById("score-team2").textContent=G.rw[1];document.getElementById("score-team2").style.color=t[1].c.v;const bo=RNDS[G.ri].v;document.getElementById("best-of-label").textContent=bo>1?"أفضل من "+bo:"";[0,1].forEach(i=>{const bd=document.getElementById("badge-team"+(i+1));bd.style.background="rgba(255,255,255,.03)";bd.style.borderColor=t[i].c.v+"44";document.getElementById("dot-team"+(i+1)).style.boxShadow="0 0 8px "+t[i].c.g;document.getElementById("name-team"+(i+1)).style.color=t[i].c.v})}
 
 function renderBoard(){
   const t=tm(),svg=document.getElementById("board-svg"),N=G.N;
   const maxH=window.innerHeight-170;
-  // Calculate hex size to fit: board spans ~(N*1.5+0.5+3)*sz wide, ~((N-1)*S3+S3+2*S3)*sz tall
-  const estW=(N+1)*1.5+2;const estH=(N+1)*S3+S3;
-  const sz=Math.min(850/(estW),maxH/(estH));
+  // Size calculation for flat-top offset grid
+  // Width: (N-1)*1.5*sz + 2*sz + 2*(1.5*sz for borders) ≈ (N+2)*1.5*sz + sz
+  // Height: (N-1)*S3*sz + S3*sz + 2*(S3*sz for borders) ≈ (N+2)*S3*sz
+  const estW = (N+2)*1.5+1;
+  const estH = (N+2)*S3;
+  const sz = Math.min(880/estW, maxH/estH);
 
-  const hexes=G.board.map(h=>({...h,...cPos(h.q,h.r,sz)}));
-  const borders=getBorders(N).map(b=>({...b,...cPos(b.q,b.r,sz)}));
+  const hexes=G.board.map(h=>({...h,...cPos(h.c,h.r,sz)}));
+  const borders=getBorders(N).map(b=>({...b,...cPos(b.c,b.r,sz)}));
   const all=[...hexes,...borders];
-  const pad=sz*1.15;
+  const pad=sz*1.1;
   const x1=Math.min(...all.map(h=>h.x))-pad,x2=Math.max(...all.map(h=>h.x))+pad;
   const y1=Math.min(...all.map(h=>h.y))-pad,y2=Math.max(...all.map(h=>h.y))+pad;
   svg.setAttribute("viewBox",x1+" "+y1+" "+(x2-x1)+" "+(y2-y1));svg.style.maxHeight=maxH+"px";
@@ -146,38 +170,39 @@ function renderBoard(){
   html+='<linearGradient id="hg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#e0e0e8"/></linearGradient>';
   html+='<filter id="hs"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/></filter></defs>';
 
-  // Border hexes: SAME size, tightly fitted, drawn FIRST (behind)
+  // Border hexes - SAME size as main hexes
   borders.forEach(b=>{
-    const c=t[b.t].c.v;
-    html+='<polygon points="'+hPts(b.x,b.y,sz)+'" fill="'+c+'" stroke="'+c+'" stroke-width="1" opacity="0.92"/>';
+    const cv=t[b.t].c.v;
+    html+='<polygon points="'+hPts(b.x,b.y,sz)+'" fill="'+cv+'" stroke="'+cv+'" stroke-width="1" opacity="0.92"/>';
   });
 
-  // Main hexes
+  // Main hexes - slightly smaller (0.97) for tight gap
+  const inner=sz*0.97;
   const fs=Math.max(sz*0.6,10);
   hexes.forEach(h=>{
-    const ow=h.o!==null,hk=h.q+","+h.r,wp=G.wp?.includes(hk);
+    const ow=h.o!==null,hk=h.c+","+h.r,wp=G.wp?.includes(hk);
     const fill=ow?t[h.o].c.v:"url(#hg)",stroke=ow?t[h.o].c.v:"#b8b8c8";
     const tc=ow?"#fff":"#1a1a2e",flt=ow?'filter="url(#gl-'+h.o+')"':'filter="url(#hs)"';
-    html+='<g class="hex-cell'+(ow?" owned":"")+(wp?" win-path":"")+'" '+flt+' onclick="onHex('+h.q+','+h.r+')" onmouseenter="hH(this,1,'+ow+')" onmouseleave="hH(this,0,'+ow+')">';
-    html+='<polygon class="hex-poly" points="'+hPts(h.x,h.y,sz*0.96)+'" fill="'+fill+'" stroke="'+stroke+'"/>';
+    html+='<g class="hex-cell'+(ow?" owned":"")+(wp?" win-path":"")+'" '+flt+' onclick="onHex('+h.c+','+h.r+')" onmouseenter="hH(this,1,'+ow+')" onmouseleave="hH(this,0,'+ow+')">';
+    html+='<polygon class="hex-poly" points="'+hPts(h.x,h.y,inner)+'" fill="'+fill+'" stroke="'+stroke+'"/>';
     html+='<text class="hex-text" x="'+h.x+'" y="'+h.y+'" fill="'+tc+'" font-size="'+fs+'">'+h.l+'</text></g>';
   });
   svg.innerHTML=html;document.getElementById("undo-btn").disabled=G.hist.length===0;
 }
 function hH(g,on,ow){if(ow)return;const p=g.querySelector(".hex-poly");if(on){p.setAttribute("stroke","#f5c842");p.setAttribute("stroke-width","3")}else{p.setAttribute("stroke","#b8b8c8");p.setAttribute("stroke-width","1.5")}}
 
-function onHex(q,r){const h=G.board.find(c=>c.q===q&&c.r===r);if(!h||h.o!==null||G.wp)return;sK();const qs=G.qs[h.l];if(!qs||!qs.length){alert('لا توجد أسئلة لحرف "'+h.l+'"');return}const u=G.used[h.l]||[];const av=qs.map((q,i)=>({q,i})).filter(x=>!u.includes(x.i));let pk;if(av.length>0){pk=av[Math.floor(Math.random()*av.length)];if(!G.used[h.l])G.used[h.l]=[];G.used[h.l].push(pk.i)}else{pk={q:qs[Math.floor(Math.random()*qs.length)]}}G.sel=h;G.cq=pk.q;showQM()}
+function onHex(c,r){const h=G.board.find(x=>x.c===c&&x.r===r);if(!h||h.o!==null||G.wp)return;sK();const qs=G.qs[h.l];if(!qs||!qs.length){alert('لا توجد أسئلة لحرف "'+h.l+'"');return}const u=G.used[h.l]||[];const av=qs.map((q,i)=>({q,i})).filter(x=>!u.includes(x.i));let pk;if(av.length>0){pk=av[Math.floor(Math.random()*av.length)];if(!G.used[h.l])G.used[h.l]=[];G.used[h.l].push(pk.i)}else{pk={q:qs[Math.floor(Math.random()*qs.length)]}}G.sel=h;G.cq=pk.q;showQM()}
 function showQM(){const h=G.sel,q=G.cq;document.getElementById("q-letter-box").textContent=h.l;document.getElementById("q-letter-box").style.background="linear-gradient(135deg,#f5c842,#f59e0b)";document.getElementById("q-header").style.background="linear-gradient(135deg,rgba(245,200,66,.1),transparent)";document.getElementById("q-letter-label").textContent="حرف «"+h.l+"»";document.getElementById("q-category").textContent=q.cat?"التصنيف: "+q.cat:"";document.getElementById("q-text").textContent=q.q;document.getElementById("q-answer-text").textContent=q.a||"—";document.getElementById("q-answer-wrap").classList.remove("visible");document.getElementById("q-reveal-btn").style.display="";showM("question-modal")}
 function revealAns(){document.getElementById("q-answer-wrap").classList.add("visible");document.getElementById("q-reveal-btn").style.display="none"}
 function closeQM(){hideM("question-modal");G.sel=null;G.cq=null}
 function handleOK(){hideM("question-modal");sC();const t=tm();document.getElementById("pick-name-1").textContent=t[0].n;document.getElementById("pick-name-2").textContent=t[1].n;const b1=document.getElementById("pick-btn-1"),b2=document.getElementById("pick-btn-2");b1.style.background="linear-gradient(135deg,"+t[0].c.v+","+t[0].c.v+"cc)";b1.style.boxShadow="0 8px 30px "+t[0].c.g;b2.style.background="linear-gradient(135deg,"+t[1].c.v+","+t[1].c.v+"cc)";b2.style.boxShadow="0 8px 30px "+t[1].c.g;showM("team-pick-modal")}
-function assign(ti){hideM("team-pick-modal");const h=G.sel;if(!h)return;h.o=ti;G.hist.push({q:h.q,r:h.r,t:ti});renderBoard();const path=checkWin(G.board,ti,G.N);if(path){G.wp=path;renderBoard();sW();G.rw[ti]++;renderUI();const bo=RNDS[G.ri].v,need=Math.ceil(bo/2),isM=G.rw[ti]>=need;setTimeout(()=>{if(isM)sM();showWin(ti,isM)},800)}G.sel=null;G.cq=null}
+function assign(ti){hideM("team-pick-modal");const h=G.sel;if(!h)return;h.o=ti;G.hist.push({c:h.c,r:h.r,t:ti});renderBoard();const path=checkWin(G.board,ti,G.N);if(path){G.wp=path;renderBoard();sW();G.rw[ti]++;renderUI();const bo=RNDS[G.ri].v,need=Math.ceil(bo/2),isM=G.rw[ti]>=need;setTimeout(()=>{if(isM)sM();showWin(ti,isM)},800)}G.sel=null;G.cq=null}
 function handleNo(){sB();hideM("question-modal");G.sel=null;G.cq=null}
 function showWin(wi,isM){const t=tm();document.getElementById("win-icon").textContent=isM?"🏆":"🎉";document.getElementById("win-team-name").textContent=t[wi].n;document.getElementById("win-team-name").style.color=t[wi].c.v;document.getElementById("win-team-name").style.textShadow="0 0 40px "+t[wi].c.g;document.getElementById("win-label").textContent=isM?"فاز بالمباراة!":"فاز بالجولة!";document.getElementById("win-score").innerHTML='النتيجة: <span class="win-score-num" style="color:'+t[0].c.v+'">'+G.rw[0]+'</span> - <span class="win-score-num" style="color:'+t[1].c.v+'">'+G.rw[1]+'</span>';let a="";if(!isM)a+='<button class="win-btn-primary" onclick="nextRd()">التالية ▶</button>';a+='<button class="'+(isM?"win-btn-primary":"win-btn-secondary")+'" onclick="newMatch()">مباراة جديدة</button>';a+='<button class="win-btn-ghost" onclick="goToSetup()">الإعدادات</button>';document.getElementById("win-actions").innerHTML=a;showM("win-modal")}
 function nextRd(){hideM("win-modal");G.wp=null;G.board=genBoard(G.N);G.hist=[];renderBoard()}
 function newMatch(){hideM("win-modal");G.rw=[0,0];G.wp=null;G.board=genBoard(G.N);G.hist=[];G.used={};renderUI();renderBoard()}
 function regenerateBoard(){G.board=genBoard(G.N);G.hist=[];G.wp=null;const w=document.getElementById("board-wrapper");w.style.animation="none";w.offsetHeight;w.style.animation="fadeInUp .5s ease-out";renderBoard()}
-function undoMove(){if(!G.hist.length)return;const l=G.hist.pop();const h=G.board.find(c=>c.q===l.q&&c.r===l.r);if(h)h.o=null;G.wp=null;renderBoard()}
+function undoMove(){if(!G.hist.length)return;const l=G.hist.pop();const h=G.board.find(x=>x.c===l.c&&x.r===l.r);if(h)h.o=null;G.wp=null;renderBoard()}
 function goToSetup(){hideM("win-modal");showScr("setup-screen");buildSetup()}
 function toggleFullscreen(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()}
 function showM(id){const el=document.getElementById(id);el.style.display="flex";requestAnimationFrame(()=>el.classList.add("visible"))}
