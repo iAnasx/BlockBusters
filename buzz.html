@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Buzz! - حروف مع أنس</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Tajawal',sans-serif;background:#0a0e27;color:#fff;direction:rtl;user-select:none;-webkit-tap-highlight-color:transparent}
+.container{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+
+/* Setup */
+.setup-panel{width:100%;max-width:400px;text-align:center}
+.setup-panel h1{font-size:28px;font-weight:900;color:#f5c842;margin-bottom:24px}
+.setup-panel input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:14px 18px;color:#fff;font-size:20px;font-family:'Tajawal',sans-serif;text-align:center;outline:none;margin-bottom:16px;direction:rtl}
+.setup-panel input:focus{border-color:#f5c842}
+.setup-panel input::placeholder{color:rgba(255,255,255,.3)}
+.team-pick{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.team-opt{padding:16px;border-radius:14px;border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);cursor:pointer;font-size:16px;font-weight:700;transition:all .2s}
+.team-opt.sel{border-width:3px}
+.join-btn{width:100%;padding:16px;border-radius:14px;background:linear-gradient(135deg,#f5c842,#f59e0b);color:#0a0e27;border:none;font-size:22px;font-weight:800;font-family:'Tajawal',sans-serif;cursor:pointer}
+.join-btn:disabled{opacity:.4;cursor:default}
+
+/* Buzzer */
+.buzzer-panel{width:100%;max-width:400px;text-align:center;display:none}
+.player-info{margin-bottom:20px}
+.player-name-display{font-size:22px;font-weight:800;margin-bottom:4px}
+.player-team-display{font-size:14px;color:#8892b0}
+.status-bar{padding:12px 20px;border-radius:12px;margin-bottom:24px;font-size:16px;font-weight:600;transition:all .3s}
+.status-waiting{background:rgba(255,255,255,.06);color:#8892b0}
+.status-ready{background:rgba(34,197,94,.15);color:#22c55e;animation:pulse 1s infinite}
+.status-buzzed{background:rgba(245,200,66,.15);color:#f5c842}
+.status-won{background:rgba(34,197,94,.2);color:#22c55e}
+.status-locked{background:rgba(239,68,68,.15);color:#ef4444}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+.buzz-btn{width:280px;height:280px;border-radius:50%;border:none;cursor:pointer;font-size:48px;font-weight:900;font-family:'Tajawal',sans-serif;color:#fff;position:relative;transition:all .15s;margin:0 auto;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.buzz-btn:active:not(:disabled){transform:scale(.9)}
+.buzz-btn:disabled{cursor:default;opacity:.5}
+.buzz-btn .buzz-sub{font-size:16px;font-weight:500;opacity:.8;margin-top:4px}
+.buzz-btn-idle{background:rgba(255,255,255,.08);box-shadow:none}
+.buzz-btn-ready{background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 0 60px rgba(34,197,94,.5);animation:btnPulse 1.2s infinite}
+.buzz-btn-pressed{background:linear-gradient(135deg,#f5c842,#f59e0b);box-shadow:0 0 60px rgba(245,200,66,.5)}
+.buzz-btn-locked{background:rgba(239,68,68,.2);box-shadow:none}
+@keyframes btnPulse{0%,100%{box-shadow:0 0 60px rgba(34,197,94,.3)}50%{box-shadow:0 0 80px rgba(34,197,94,.6)}}
+
+.timer-display{font-size:72px;font-weight:900;margin-top:20px;color:#f5c842;display:none}
+.connected-dot{position:fixed;top:12px;left:12px;width:10px;height:10px;border-radius:50%;background:#ef4444}
+.connected-dot.on{background:#22c55e}
+</style>
+</head>
+<body>
+<div class="connected-dot" id="conn-dot"></div>
+<div class="container">
+  <!-- SETUP -->
+  <div class="setup-panel" id="setup-panel">
+    <h1>⬡ حروف مع أنس</h1>
+    <input type="text" id="player-name" placeholder="اكتب اسمك..." maxlength="20">
+    <div class="team-pick">
+      <div class="team-opt" id="team-opt-1" onclick="pickTeam(1)">الفريق ١<br><span style="font-size:12px;opacity:.6">← →</span></div>
+      <div class="team-opt" id="team-opt-2" onclick="pickTeam(2)">الفريق ٢<br><span style="font-size:12px;opacity:.6">↑ ↓</span></div>
+    </div>
+    <button class="join-btn" id="join-btn" onclick="joinGame()" disabled>انضم للعبة</button>
+    <p style="color:#ef4444;font-size:13px;margin-top:12px;display:none" id="error-msg"></p>
+  </div>
+
+  <!-- BUZZER -->
+  <div class="buzzer-panel" id="buzzer-panel">
+    <div class="player-info">
+      <div class="player-name-display" id="p-name"></div>
+      <div class="player-team-display" id="p-team"></div>
+    </div>
+    <div class="status-bar status-waiting" id="status-bar">في انتظار السؤال...</div>
+    <button class="buzz-btn buzz-btn-idle" id="buzz-btn" onclick="doBuzz()" disabled>
+      <span>🔔</span>
+      <span class="buzz-sub">في الانتظار</span>
+    </button>
+    <div class="timer-display" id="timer-display"></div>
+  </div>
+</div>
+
+<script>
+// ═══════ FIREBASE CONFIG ═══════
+// ⚠️ REPLACE with your Firebase project config
+const firebaseConfig = {
+  apiKey: "AIzaSyD_REPLACE_ME",
+  authDomain: "your-project.firebaseapp.com",
+  databaseURL: "https://your-project-default-rtdb.firebaseio.com",
+  projectId: "your-project",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "000000000000",
+  appId: "1:000:web:000"
+};
+// ═══════════════════════════════
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const buzzerRef = db.ref('buzzer');
+
+let mySlot = null;
+let myName = '';
+let myTeam = 0;
+let selectedTeam = 0;
+let currentState = 'idle';
+
+// Connection status
+db.ref('.info/connected').on('value', snap => {
+  document.getElementById('conn-dot').classList.toggle('on', snap.val() === true);
+});
+
+// Team pick
+function pickTeam(t) {
+  selectedTeam = t;
+  document.getElementById('team-opt-1').classList.toggle('sel', t === 1);
+  document.getElementById('team-opt-2').classList.toggle('sel', t === 2);
+  document.getElementById('team-opt-1').style.borderColor = t === 1 ? '#0ea5e9' : 'rgba(255,255,255,.1)';
+  document.getElementById('team-opt-2').style.borderColor = t === 2 ? '#ef4444' : 'rgba(255,255,255,.1)';
+  checkReady();
+}
+
+document.getElementById('player-name').addEventListener('input', checkReady);
+function checkReady() {
+  const name = document.getElementById('player-name').value.trim();
+  document.getElementById('join-btn').disabled = !name || !selectedTeam;
+}
+
+// Join
+async function joinGame() {
+  myName = document.getElementById('player-name').value.trim();
+  myTeam = selectedTeam;
+  if (!myName || !myTeam) return;
+
+  // Find an open slot (1-6)
+  const snap = await buzzerRef.child('players').once('value');
+  const players = snap.val() || {};
+  mySlot = null;
+  for (let i = 1; i <= 6; i++) {
+    if (!players[i] || !players[i].online) { mySlot = i; break; }
+  }
+  if (!mySlot) {
+    document.getElementById('error-msg').style.display = 'block';
+    document.getElementById('error-msg').textContent = 'جميع المقاعد ممتلئة (6/6)';
+    return;
+  }
+
+  // Register
+  const playerRef = buzzerRef.child('players/' + mySlot);
+  await playerRef.set({ name: myName, team: myTeam, online: true });
+  playerRef.onDisconnect().update({ online: false });
+
+  // Switch to buzzer view
+  document.getElementById('setup-panel').style.display = 'none';
+  document.getElementById('buzzer-panel').style.display = 'block';
+  document.getElementById('p-name').textContent = myName;
+  document.getElementById('p-name').style.color = myTeam === 1 ? '#0ea5e9' : '#ef4444';
+  document.getElementById('p-team').textContent = 'الفريق ' + (myTeam === 1 ? '١ (← →)' : '٢ (↑ ↓)') + ' • مقعد ' + mySlot;
+
+  // Listen for state changes
+  listenState();
+}
+
+function listenState() {
+  buzzerRef.on('value', snap => {
+    const data = snap.val() || {};
+    const state = data.state || 'idle';
+    const buzzedBy = data.buzzedBy || null;
+    const lockedTeam = data.lockedTeam || null;
+    currentState = state;
+
+    const btn = document.getElementById('buzz-btn');
+    const status = document.getElementById('status-bar');
+
+    if (state === 'idle') {
+      setBtn('idle', '🔔', 'في الانتظار', true);
+      setStatus('waiting', 'في انتظار السؤال...');
+    }
+    else if (state === 'open') {
+      setBtn('ready', '🔴', 'اضغط!', false);
+      setStatus('ready', '❗ السؤال مطروح — اضغط للإجابة!');
+    }
+    else if (state === 'buzzed') {
+      if (buzzedBy && buzzedBy.slot == mySlot) {
+        setBtn('pressed', '⭐', 'أنت ضغطت!', true);
+        setStatus('won', '🎉 أنت ضغطت أولاً! أجب الآن');
+      } else {
+        const who = buzzedBy ? buzzedBy.name : '?';
+        setBtn('idle', '🔔', 'انتظر', true);
+        setStatus('buzzed', '🔔 ' + who + ' ضغط أولاً');
+      }
+    }
+    else if (state === 'team_chance') {
+      if (myTeam == lockedTeam) {
+        setBtn('locked', '🚫', 'محظور', true);
+        setStatus('locked', '⏳ فرصة للفريق الآخر...');
+      } else {
+        setBtn('ready', '🔴', 'اضغط!', false);
+        setStatus('ready', '⚡ فرصة لفريقك — اضغط!');
+      }
+    }
+    else if (state === 'open_all') {
+      setBtn('ready', '🔴', 'اضغط!', false);
+      setStatus('ready', '❗ مفتوح للجميع — اضغط!');
+    }
+  });
+}
+
+function setBtn(type, icon, sub, disabled) {
+  const btn = document.getElementById('buzz-btn');
+  btn.className = 'buzz-btn buzz-btn-' + type;
+  btn.innerHTML = '<span>' + icon + '</span><span class="buzz-sub">' + sub + '</span>';
+  btn.disabled = disabled;
+}
+function setStatus(type, text) {
+  const el = document.getElementById('status-bar');
+  el.className = 'status-bar status-' + type;
+  el.textContent = text;
+}
+
+async function doBuzz() {
+  if (!mySlot) return;
+  const btn = document.getElementById('buzz-btn');
+  btn.disabled = true;
+
+  // Write buzz with server timestamp for fairness
+  try {
+    await buzzerRef.child('buzzQueue/' + mySlot).set({
+      slot: mySlot,
+      name: myName,
+      team: myTeam,
+      time: firebase.database.ServerValue.TIMESTAMP
+    });
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+// Vibrate on state change
+buzzerRef.child('state').on('value', snap => {
+  const s = snap.val();
+  if (s === 'open' || s === 'team_chance' || s === 'open_all') {
+    if (navigator.vibrate) navigator.vibrate(200);
+  }
+  if (s === 'buzzed') {
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+  }
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+  if (mySlot) buzzerRef.child('players/' + mySlot + '/online').set(false);
+});
+</script>
+</body>
+</html>
