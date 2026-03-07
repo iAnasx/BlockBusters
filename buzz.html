@@ -28,21 +28,30 @@ body{font-family:'Tajawal',sans-serif;background:#0a0e27;color:#fff;direction:rt
 .player-team-display{font-size:14px;color:#8892b0}
 .status-bar{padding:12px 20px;border-radius:12px;margin-bottom:24px;font-size:16px;font-weight:600;transition:all .3s}
 .status-waiting{background:rgba(255,255,255,.06);color:#8892b0}
-.status-ready{background:rgba(34,197,94,.15);color:#22c55e;animation:pulse 1s infinite}
+.status-ready{background:rgba(34,197,94,.15);color:#22c55e;animation:pulseStatus 1s infinite}
 .status-buzzed{background:rgba(245,200,66,.15);color:#f5c842}
 .status-won{background:rgba(34,197,94,.2);color:#22c55e}
 .status-locked{background:rgba(239,68,68,.15);color:#ef4444}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
-.buzz-btn{width:280px;height:280px;border-radius:50%;border:none;cursor:pointer;font-size:48px;font-weight:900;font-family:'Tajawal',sans-serif;color:#fff;position:relative;transition:all .15s;margin:0 auto;display:flex;align-items:center;justify-content:center;flex-direction:column}
+@keyframes pulseStatus{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* Timer ring */
+.timer-ring-wrap{display:none;margin:0 auto 20px;position:relative;width:100px;height:100px}
+.timer-ring-wrap.visible{display:block}
+.timer-ring-svg{width:100px;height:100px;transform:rotate(-90deg)}
+.timer-ring-bg{fill:none;stroke:rgba(255,255,255,.08);stroke-width:6}
+.timer-ring-fg{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .3s linear,stroke .3s}
+.timer-ring-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;font-family:'Tajawal',sans-serif}
+
+.buzz-btn{width:260px;height:260px;border-radius:50%;border:none;cursor:pointer;font-size:48px;font-weight:900;font-family:'Tajawal',sans-serif;color:#fff;position:relative;transition:all .15s;margin:0 auto;display:flex;align-items:center;justify-content:center;flex-direction:column}
 .buzz-btn:active:not(:disabled){transform:scale(.9)}
 .buzz-btn:disabled{cursor:default;opacity:.5}
 .buzz-btn .buzz-sub{font-size:16px;font-weight:500;opacity:.8;margin-top:4px}
 .buzz-btn-idle{background:rgba(255,255,255,.08);box-shadow:none}
-.buzz-btn-ready{background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 0 60px rgba(34,197,94,.5);animation:btnPulse 1.2s infinite}
+.buzz-btn-ready{background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 0 60px rgba(34,197,94,.4),0 0 120px rgba(34,197,94,.15);animation:btnPulse 1.2s infinite}
 .buzz-btn-pressed{background:linear-gradient(135deg,#f5c842,#f59e0b);box-shadow:0 0 60px rgba(245,200,66,.5)}
-.buzz-btn-locked{background:rgba(239,68,68,.2);box-shadow:none}
-@keyframes btnPulse{0%,100%{box-shadow:0 0 60px rgba(34,197,94,.3)}50%{box-shadow:0 0 80px rgba(34,197,94,.6)}}
-.timer-display{font-size:72px;font-weight:900;margin-top:20px;color:#f5c842;display:none}
+.buzz-btn-locked{background:rgba(239,68,68,.15);box-shadow:0 0 40px rgba(239,68,68,.15)}
+@keyframes btnPulse{0%,100%{box-shadow:0 0 60px rgba(34,197,94,.3),0 0 120px rgba(34,197,94,.1)}50%{box-shadow:0 0 80px rgba(34,197,94,.5),0 0 150px rgba(34,197,94,.2)}}
+
 .connected-dot{position:fixed;top:12px;left:12px;width:10px;height:10px;border-radius:50%;background:#ef4444}
 .connected-dot.on{background:#22c55e}
 </style>
@@ -54,8 +63,8 @@ body{font-family:'Tajawal',sans-serif;background:#0a0e27;color:#fff;direction:rt
     <h1>⬡ حروف مع أنس</h1>
     <input type="text" id="player-name" placeholder="اكتب اسمك..." maxlength="20">
     <div class="team-pick">
-      <div class="team-opt" id="team-opt-1" onclick="pickTeam(1)">الفريق ١<br><span style="font-size:12px;opacity:.6">← →</span></div>
-      <div class="team-opt" id="team-opt-2" onclick="pickTeam(2)">الفريق ٢<br><span style="font-size:12px;opacity:.6">↑ ↓</span></div>
+      <div class="team-opt" id="team-opt-1" onclick="pickTeam(1)"><span id="t1label">الفريق ١</span><br><span style="font-size:12px;opacity:.6">← →</span></div>
+      <div class="team-opt" id="team-opt-2" onclick="pickTeam(2)"><span id="t2label">الفريق ٢</span><br><span style="font-size:12px;opacity:.6">↑ ↓</span></div>
     </div>
     <button class="join-btn" id="join-btn" onclick="joinGame()" disabled>انضم للعبة</button>
     <p style="color:#ef4444;font-size:13px;margin-top:12px;display:none" id="error-msg"></p>
@@ -66,11 +75,17 @@ body{font-family:'Tajawal',sans-serif;background:#0a0e27;color:#fff;direction:rt
       <div class="player-team-display" id="p-team"></div>
     </div>
     <div class="status-bar status-waiting" id="status-bar">في انتظار السؤال...</div>
+    <div class="timer-ring-wrap" id="timer-wrap">
+      <svg class="timer-ring-svg" viewBox="0 0 100 100">
+        <circle class="timer-ring-bg" cx="50" cy="50" r="44"/>
+        <circle class="timer-ring-fg" id="timer-ring" cx="50" cy="50" r="44" stroke="#f5c842" stroke-dasharray="276.46" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-ring-text" id="timer-text">3</div>
+    </div>
     <button class="buzz-btn buzz-btn-idle" id="buzz-btn" onclick="doBuzz()" disabled>
       <span>🔔</span>
       <span class="buzz-sub">في الانتظار</span>
     </button>
-    <div class="timer-display" id="timer-display"></div>
   </div>
 </div>
 <script>
@@ -83,128 +98,112 @@ const firebaseConfig = {
   messagingSenderId: "307733370745",
   appId: "1:307733370745:web:9506fd3c2ba745fb1141a8"
 };
-
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const buzzerRef = db.ref('buzzer');
+const db=firebase.database(), buzzerRef=db.ref('buzzer');
+let mySlot=null,myName='',myTeam=0,selectedTeam=0,localTimer=null;
+const CIRC=2*Math.PI*44; // 276.46
 
-let mySlot = null, myName = '', myTeam = 0, selectedTeam = 0, currentState = 'idle';
+db.ref('.info/connected').on('value',s=>{document.getElementById('conn-dot').classList.toggle('on',s.val()===true)});
 
-db.ref('.info/connected').on('value', snap => {
-  document.getElementById('conn-dot').classList.toggle('on', snap.val() === true);
+// Sync team names from host
+buzzerRef.child('teamNames').on('value',s=>{
+  const d=s.val()||{};
+  if(d.t1)document.getElementById('t1label').textContent=d.t1;
+  if(d.t2)document.getElementById('t2label').textContent=d.t2;
 });
 
-function pickTeam(t) {
-  selectedTeam = t;
-  document.getElementById('team-opt-1').classList.toggle('sel', t === 1);
-  document.getElementById('team-opt-2').classList.toggle('sel', t === 2);
-  document.getElementById('team-opt-1').style.borderColor = t === 1 ? '#0ea5e9' : 'rgba(255,255,255,.1)';
-  document.getElementById('team-opt-2').style.borderColor = t === 2 ? '#ef4444' : 'rgba(255,255,255,.1)';
+function pickTeam(t){
+  selectedTeam=t;
+  document.getElementById('team-opt-1').classList.toggle('sel',t===1);
+  document.getElementById('team-opt-2').classList.toggle('sel',t===2);
+  document.getElementById('team-opt-1').style.borderColor=t===1?'#0ea5e9':'rgba(255,255,255,.1)';
+  document.getElementById('team-opt-2').style.borderColor=t===2?'#ef4444':'rgba(255,255,255,.1)';
   checkReady();
 }
-document.getElementById('player-name').addEventListener('input', checkReady);
-function checkReady() {
-  document.getElementById('join-btn').disabled = !document.getElementById('player-name').value.trim() || !selectedTeam;
-}
+document.getElementById('player-name').addEventListener('input',checkReady);
+function checkReady(){document.getElementById('join-btn').disabled=!document.getElementById('player-name').value.trim()||!selectedTeam}
 
-async function joinGame() {
-  myName = document.getElementById('player-name').value.trim();
-  myTeam = selectedTeam;
-  if (!myName || !myTeam) return;
-  const snap = await buzzerRef.child('players').once('value');
-  const players = snap.val() || {};
-  mySlot = null;
-  for (let i = 1; i <= 6; i++) {
-    if (!players[i] || !players[i].online) { mySlot = i; break; }
-  }
-  if (!mySlot) {
-    document.getElementById('error-msg').style.display = 'block';
-    document.getElementById('error-msg').textContent = 'جميع المقاعد ممتلئة (6/6)';
-    return;
-  }
-  const playerRef = buzzerRef.child('players/' + mySlot);
-  await playerRef.set({ name: myName, team: myTeam, online: true });
-  playerRef.onDisconnect().update({ online: false });
-  document.getElementById('setup-panel').style.display = 'none';
-  document.getElementById('buzzer-panel').style.display = 'block';
-  document.getElementById('p-name').textContent = myName;
-  document.getElementById('p-name').style.color = myTeam === 1 ? '#0ea5e9' : '#ef4444';
-  document.getElementById('p-team').textContent = 'الفريق ' + (myTeam === 1 ? '١ (← →)' : '٢ (↑ ↓)') + ' • مقعد ' + mySlot;
+async function joinGame(){
+  myName=document.getElementById('player-name').value.trim();myTeam=selectedTeam;
+  if(!myName||!myTeam)return;
+  const snap=await buzzerRef.child('players').once('value');
+  const players=snap.val()||{};mySlot=null;
+  for(let i=1;i<=6;i++){if(!players[i]||!players[i].online){mySlot=i;break}}
+  if(!mySlot){document.getElementById('error-msg').style.display='block';document.getElementById('error-msg').textContent='جميع المقاعد ممتلئة (6/6)';return}
+  const pr=buzzerRef.child('players/'+mySlot);
+  await pr.set({name:myName,team:myTeam,online:true});
+  pr.onDisconnect().update({online:false});
+  document.getElementById('setup-panel').style.display='none';
+  document.getElementById('buzzer-panel').style.display='block';
+  document.getElementById('p-name').textContent=myName;
+  document.getElementById('p-name').style.color=myTeam===1?'#0ea5e9':'#ef4444';
+  // Get team name from firebase
+  const tn=await buzzerRef.child('teamNames').once('value');
+  const tnd=tn.val()||{};
+  const teamLabel=myTeam===1?(tnd.t1||'الفريق ١'):(tnd.t2||'الفريق ٢');
+  document.getElementById('p-team').textContent=teamLabel+' • مقعد '+mySlot;
   listenState();
 }
 
-function listenState() {
-  buzzerRef.on('value', snap => {
-    const data = snap.val() || {};
-    const state = data.state || 'idle';
-    const buzzedBy = data.buzzedBy || null;
-    const lockedTeam = data.lockedTeam || null;
-    currentState = state;
-    if (state === 'idle') {
-      setBtn('idle', '🔔', 'في الانتظار', true);
-      setStatus('waiting', 'في انتظار السؤال...');
-    } else if (state === 'open') {
-      setBtn('ready', '🔴', 'اضغط!', false);
-      setStatus('ready', '❗ السؤال مطروح — اضغط للإجابة!');
-    } else if (state === 'buzzed') {
-      if (buzzedBy && buzzedBy.slot == mySlot) {
-        setBtn('pressed', '⭐', 'أنت ضغطت!', true);
-        setStatus('won', '🎉 أنت ضغطت أولاً! أجب الآن');
-      } else {
-        setBtn('idle', '🔔', 'انتظر', true);
-        setStatus('buzzed', '🔔 ' + (buzzedBy ? buzzedBy.name : '?') + ' ضغط أولاً');
+function listenState(){
+  buzzerRef.on('value',snap=>{
+    const d=snap.val()||{},state=d.state||'idle',buzzedBy=d.buzzedBy||null,lockedTeam=d.lockedTeam||null;
+    const timer=d.timer||null; // {running,total,endsAt}
+    
+    if(state==='idle'){
+      setBtn('idle','🔔','في الانتظار',true);setStatus('waiting','في انتظار السؤال...');hideTimer();
+    }else if(state==='open'){
+      setBtn('ready','🔴','اضغط!',false);setStatus('ready','❗ السؤال مطروح — اضغط للإجابة!');hideTimer();
+    }else if(state==='buzzed'){
+      if(buzzedBy&&buzzedBy.slot==mySlot){
+        setBtn('pressed','⭐','أنت!',true);setStatus('won','🎉 أنت ضغطت أولاً! أجب الآن');
+      }else{
+        setBtn('idle','🔔','انتظر',true);setStatus('buzzed','🔔 '+(buzzedBy?buzzedBy.name:'?')+' ضغط أولاً');
       }
-    } else if (state === 'team_chance') {
-      if (myTeam == lockedTeam) {
-        setBtn('locked', '🚫', 'محظور', true);
-        setStatus('locked', '⏳ فرصة للفريق الآخر...');
-      } else {
-        setBtn('ready', '🔴', 'اضغط!', false);
-        setStatus('ready', '⚡ فرصة لفريقك — اضغط!');
+      if(timer&&timer.running)startLocalTimer(timer.endsAt,timer.total,'#f5c842');else hideTimer();
+    }else if(state==='team_chance'){
+      if(myTeam==lockedTeam){
+        setBtn('locked','🚫','محظور',true);setStatus('locked','⏳ فرصة للفريق الآخر...');
+      }else{
+        setBtn('ready','🔴','اضغط!',false);setStatus('ready','⚡ فرصة لفريقك — اضغط!');
       }
-    } else if (state === 'open_all') {
-      setBtn('ready', '🔴', 'اضغط!', false);
-      setStatus('ready', '❗ مفتوح للجميع — اضغط!');
+      if(timer&&timer.running)startLocalTimer(timer.endsAt,timer.total,'#f97316');else hideTimer();
+    }else if(state==='open_all'){
+      setBtn('ready','🔴','اضغط!',false);setStatus('ready','❗ مفتوح للجميع — اضغط!');hideTimer();
     }
   });
 }
 
-function setBtn(type, icon, sub, disabled) {
-  const btn = document.getElementById('buzz-btn');
-  btn.className = 'buzz-btn buzz-btn-' + type;
-  btn.innerHTML = '<span>' + icon + '</span><span class="buzz-sub">' + sub + '</span>';
-  btn.disabled = disabled;
-}
-function setStatus(type, text) {
-  const el = document.getElementById('status-bar');
-  el.className = 'status-bar status-' + type;
-  el.textContent = text;
-}
+function setBtn(type,icon,sub,disabled){const b=document.getElementById('buzz-btn');b.className='buzz-btn buzz-btn-'+type;b.innerHTML='<span>'+icon+'</span><span class="buzz-sub">'+sub+'</span>';b.disabled=disabled}
+function setStatus(type,text){const e=document.getElementById('status-bar');e.className='status-bar status-'+type;e.textContent=text}
 
-async function doBuzz() {
-  if (!mySlot) return;
-  document.getElementById('buzz-btn').disabled = true;
-  try {
-    await buzzerRef.child('buzzQueue/' + mySlot).set({
-      slot: mySlot, name: myName, team: myTeam,
-      time: firebase.database.ServerValue.TIMESTAMP
-    });
-  } catch(e) { console.error(e); }
-}
-
-buzzerRef.child('state').on('value', snap => {
-  const s = snap.val();
-  if (s === 'open' || s === 'team_chance' || s === 'open_all') {
-    if (navigator.vibrate) navigator.vibrate(200);
+function startLocalTimer(endsAt,total,color){
+  clearInterval(localTimer);
+  const wrap=document.getElementById('timer-wrap');wrap.classList.add('visible');
+  const ring=document.getElementById('timer-ring');ring.setAttribute('stroke',color);
+  const txt=document.getElementById('timer-text');txt.style.color=color;
+  function tick(){
+    const now=Date.now(),left=Math.max(0,(endsAt-now)/1000);
+    const frac=left/total;
+    ring.style.strokeDashoffset=((1-frac)*CIRC).toFixed(1);
+    txt.textContent=Math.ceil(left);
+    if(left<=0){clearInterval(localTimer);txt.textContent='0'}
   }
-  if (s === 'buzzed') {
-    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-  }
-});
+  tick();localTimer=setInterval(tick,100);
+}
+function hideTimer(){clearInterval(localTimer);document.getElementById('timer-wrap').classList.remove('visible')}
 
-window.addEventListener('beforeunload', () => {
-  if (mySlot) buzzerRef.child('players/' + mySlot + '/online').set(false);
+async function doBuzz(){
+  if(!mySlot)return;document.getElementById('buzz-btn').disabled=true;
+  try{await buzzerRef.child('buzzQueue/'+mySlot).set({slot:mySlot,name:myName,team:myTeam,time:firebase.database.ServerValue.TIMESTAMP})}catch(e){console.error(e)}
+}
+
+buzzerRef.child('state').on('value',s=>{
+  const v=s.val();
+  if(v==='open'||v==='team_chance'||v==='open_all'){if(navigator.vibrate)navigator.vibrate(200)}
+  if(v==='buzzed'){if(navigator.vibrate)navigator.vibrate([100,50,100])}
 });
+window.addEventListener('beforeunload',()=>{if(mySlot)buzzerRef.child('players/'+mySlot+'/online').set(false)});
 </script>
 </body>
 </html>
