@@ -31,7 +31,21 @@ body{font-family:'Tajawal',sans-serif;background:linear-gradient(135deg,#0a0e27 
 .team-badge{display:flex;align-items:center;gap:10px;padding:8px 16px;border-radius:14px;background:rgba(255,255,255,.03);border:2px solid transparent}.team-dot{width:12px;height:12px;border-radius:50%}.team-name{font-weight:700;font-size:15px}.team-dir-label{font-weight:800;font-size:12px;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,.1);color:#fff}
 .score-center{display:flex;align-items:center;gap:10px}.score-box{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);padding:6px 18px;border-radius:10px}.score-num{font-weight:800;font-size:22px}.score-sep{color:#8892b0}.best-of-label{color:#8892b0;font-size:12px}
 .board-area{flex:1;display:flex;align-items:center;justify-content:center;padding:10px 16px;min-height:0;overflow:hidden;position:relative}
-.players-panel{position:absolute;top:8px;left:8px;background:rgba(21,26,58,.9);border-radius:14px;padding:10px;border:1px solid rgba(255,255,255,.08);font-size:11px;min-width:140px;z-index:10}.players-panel h3{font-size:12px;color:#f5c842;margin-bottom:6px;text-align:center}.player-slot{display:flex;align-items:center;gap:6px;padding:3px 6px;border-radius:6px;margin-bottom:2px}.player-slot .p-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}.player-slot .p-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.player-slot.offline{opacity:.3}
+
+/* Players panel with controls */
+.players-panel{position:absolute;top:8px;left:8px;background:rgba(21,26,58,.95);border-radius:14px;padding:10px;border:1px solid rgba(255,255,255,.08);font-size:11px;min-width:180px;max-height:calc(100% - 16px);overflow-y:auto;z-index:10}
+.players-panel h3{font-size:12px;color:#f5c842;margin-bottom:8px;text-align:center}
+.pp-slot{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:8px;margin-bottom:3px;background:rgba(255,255,255,.02)}
+.pp-slot.offline{opacity:.35}
+.pp-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.pp-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.pp-actions{display:flex;gap:3px;flex-shrink:0}
+.pp-btn{width:22px;height:22px;border-radius:6px;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;transition:all .15s;background:rgba(255,255,255,.06);color:#8892b0}
+.pp-btn:hover{background:rgba(255,255,255,.15);color:#fff}
+.pp-btn.danger:hover{background:rgba(239,68,68,.3);color:#ef4444}
+.pp-btn.muted{background:rgba(239,68,68,.2);color:#ef4444}
+.pp-none{color:#555;font-size:11px;text-align:center;padding:8px}
+
 .board-wrapper{width:100%;max-width:900px;animation:fadeInUp .5s ease-out}@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .board-svg{width:100%;height:auto;display:block}.hex-cell{cursor:pointer}.hex-poly{transition:all .25s ease;stroke-width:1.5}.hex-cell:hover .hex-poly{stroke-width:3}.hex-cell.owned{cursor:default}.hex-text{pointer-events:none;font-family:'Tajawal',sans-serif;font-weight:800;dominant-baseline:central;text-anchor:middle}.hex-cell.win-path .hex-poly{animation:winPulse 1s ease-in-out infinite}@keyframes winPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
 .bottom-toolbar{padding:10px 16px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:center;gap:8px;flex-wrap:wrap;flex-shrink:0}.tool-btn{padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#8892b0;cursor:pointer;font-size:13px;font-family:'Tajawal',sans-serif;transition:all .2s}.tool-btn:hover{background:rgba(255,255,255,.12);color:#fff}.tool-btn:disabled{opacity:.4;cursor:default}
@@ -40,37 +54,27 @@ body{font-family:'Tajawal',sans-serif;background:linear-gradient(135deg,#0a0e27 
 .q-header{padding:20px 28px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08)}.q-letter-box{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:#fff}.q-info{margin-right:12px}.q-letter-label{font-weight:700;font-size:16px;color:#f5c842}.q-category{color:#8892b0;font-size:12px}.q-close-btn{background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:10px;width:38px;height:38px;cursor:pointer;font-size:18px}
 .q-body{padding:32px;text-align:center}.q-text{color:#fff;font-size:26px;font-weight:600;line-height:1.8;direction:rtl}
 .q-answer-wrap{padding:0 32px 16px;text-align:center;display:none}.q-answer-wrap.visible{display:block}.q-answer-box{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:14px;padding:14px 20px;display:inline-block}.q-answer-label{color:#8892b0;font-size:12px;margin-bottom:4px}.q-answer-text{color:#22c55e;font-size:22px;font-weight:700;direction:rtl}
-
-/* ─── BUZZER STATUS (host view) ─── */
-.buzzer-host{padding:16px 28px;display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;min-height:80px}
-.buzz-waiting{color:#8892b0;font-size:15px;animation:pulseWait 1.2s infinite}@keyframes pulseWait{0%,100%{opacity:1}50%{opacity:.4}}
-.buzz-who{display:flex;align-items:center;gap:16px}
-.buzz-who-info{text-align:right}
-.buzz-who-name{font-size:28px;font-weight:900}
-.buzz-who-team{font-size:13px;color:#8892b0}
-.buzz-team-chance-label{font-size:16px;color:#f97316;font-weight:700}
-
-/* Ring timer (host) */
+.buzzer-host{padding:16px 28px;display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;min-height:70px}
+.buzz-waiting{color:#8892b0;font-size:15px;animation:pw 1.2s infinite}@keyframes pw{0%,100%{opacity:1}50%{opacity:.4}}
+.buzz-who{display:flex;align-items:center;gap:16px}.buzz-who-info{text-align:right}
+.buzz-who-name{font-size:28px;font-weight:900}.buzz-who-team{font-size:13px;color:#8892b0}.buzz-chance-label{font-size:16px;color:#f97316;font-weight:700}
 .host-timer{position:relative;width:80px;height:80px;flex-shrink:0}
 .host-timer svg{width:80px;height:80px;transform:rotate(-90deg)}
 .host-timer .ring-bg{fill:none;stroke:rgba(255,255,255,.08);stroke-width:6}
 .host-timer .ring-fg{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .15s linear}
-.host-timer .ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;font-family:'Tajawal',sans-serif}
-.host-timer.danger .ring-fg{stroke:#ef4444!important}
-.host-timer.danger .ring-num{color:#ef4444!important}
-
+.host-timer .ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900}
+.host-timer.danger .ring-fg{stroke:#ef4444!important}.host-timer.danger .ring-num{color:#ef4444!important}
 .q-actions{padding:12px 28px 24px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .q-btn{padding:10px 24px;border-radius:12px;border:none;cursor:pointer;font-size:14px;font-weight:700;font-family:'Tajawal',sans-serif;transition:all .2s}
 .q-btn-reveal{background:rgba(255,255,255,.08);color:#8892b0;border:1px solid rgba(255,255,255,.15)}
-.q-btn-correct{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;box-shadow:0 4px 20px rgba(34,197,94,.3)}
-.q-btn-wrong{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;box-shadow:0 4px 20px rgba(239,68,68,.3)}
+.q-btn-correct{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.q-btn-wrong{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
 .q-btn-timer{background:rgba(245,200,66,.12);color:#f5c842;border:1px solid rgba(245,200,66,.3)}
 .q-btn-reset{background:rgba(255,255,255,.06);color:#f5c842;border:1px solid rgba(245,200,66,.25)}
 .q-btn-chance{background:rgba(249,115,22,.15);color:#f97316;border:1px solid rgba(249,115,22,.3)}
 .q-btn:hover{transform:translateY(-1px)}
-
 #win-modal{z-index:1000;background:rgba(0,0,0,.92)}#win-modal .modal-card{max-width:500px;padding:48px 32px;text-align:center;background:transparent;box-shadow:none}.win-icon{font-size:86px;margin-bottom:12px}.win-team{font-size:48px;font-weight:900;margin-bottom:12px}.win-label{font-size:24px;margin-bottom:8px}.win-score{color:#8892b0;font-size:20px;margin-bottom:36px}.win-score-num{font-weight:800}.win-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.win-btn-primary{padding:14px 36px;border-radius:14px;background:linear-gradient(135deg,#f5c842,#f59e0b);color:#0a0e27;border:none;cursor:pointer;font-size:18px;font-weight:800;font-family:'Tajawal',sans-serif}.win-btn-secondary{padding:14px 36px;border-radius:14px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);cursor:pointer;font-size:18px;font-family:'Tajawal',sans-serif}.win-btn-ghost{padding:14px 36px;border-radius:14px;background:rgba(255,255,255,.06);color:#8892b0;border:1px solid rgba(255,255,255,.1);cursor:pointer;font-size:16px;font-family:'Tajawal',sans-serif}
-#editor-modal{z-index:950}#editor-modal .modal-card{max-width:720px;max-height:90vh;display:flex;flex-direction:column;border:1px solid rgba(245,200,66,.2)}.editor-header{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}.editor-header h2{font-size:20px}.editor-body{display:flex;flex:1;min-height:0}.letter-list{width:70px;border-left:1px solid rgba(255,255,255,.08);overflow-y:auto;padding:8px 4px;display:flex;flex-direction:column;gap:2px;flex-shrink:0}.letter-btn{padding:8px 4px;border-radius:8px;background:transparent;color:#8892b0;border:none;cursor:pointer;font-size:18px;font-weight:700;font-family:'Tajawal',sans-serif;position:relative;transition:all .2s}.letter-btn.selected{background:rgba(245,200,66,.2);color:#f5c842}.letter-btn .dot{position:absolute;top:2px;left:4px;width:6px;height:6px;background:#22c55e;border-radius:50%;display:none}.letter-btn.has-q .dot{display:block}.editor-content{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}.editor-letter-title{color:#f5c842;font-size:14px;font-weight:600}.q-item{background:rgba(255,255,255,.04);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:flex-start}.q-item-text{flex:1}.q-item-question{color:#fff;font-size:14px;margin-bottom:4px}.q-item-answer{color:#22c55e;font-size:12px}.q-item-cat{color:#8892b0;font-size:11px;margin-top:2px}.q-item-del{background:rgba(239,68,68,.15);color:#ef4444;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-family:'Tajawal',sans-serif;margin-right:8px;flex-shrink:0}.add-q-form{background:rgba(245,200,66,.05);border-radius:12px;padding:14px;border:1px dashed rgba(245,200,66,.2)}.add-q-form .form-label{color:#f5c842;font-size:12px;margin-bottom:8px}.add-q-form input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;color:#fff;font-size:14px;outline:none;font-family:'Tajawal',sans-serif;direction:rtl;margin-bottom:6px}.add-q-row{display:flex;gap:6px}.add-q-row input{flex:1}.add-q-btn{margin-top:8px;padding:8px 22px;border-radius:8px;background:linear-gradient(135deg,#f5c842,#f59e0b);color:#0a0e27;border:none;cursor:pointer;font-size:13px;font-weight:700;font-family:'Tajawal',sans-serif}.editor-actions{display:flex;gap:8px}.btn-danger{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}.btn-close-editor{padding:6px 16px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;border:none;cursor:pointer;font-size:16px}
+#editor-modal{z-index:950}#editor-modal .modal-card{max-width:720px;max-height:90vh;display:flex;flex-direction:column;border:1px solid rgba(245,200,66,.2)}.editor-header{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}.editor-header h2{font-size:20px}.editor-body{display:flex;flex:1;min-height:0}.letter-list{width:70px;border-left:1px solid rgba(255,255,255,.08);overflow-y:auto;padding:8px 4px;display:flex;flex-direction:column;gap:2px;flex-shrink:0}.letter-btn{padding:8px 4px;border-radius:8px;background:transparent;color:#8892b0;border:none;cursor:pointer;font-size:18px;font-weight:700;font-family:'Tajawal',sans-serif;position:relative;transition:all .2s}.letter-btn.selected{background:rgba(245,200,66,.2);color:#f5c842}.letter-btn .dot{position:absolute;top:2px;left:4px;width:6px;height:6px;background:#22c55e;border-radius:50%;display:none}.letter-btn.has-q .dot{display:block}.editor-content{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}.editor-letter-title{color:#f5c842;font-size:14px;font-weight:600}.q-item{background:rgba(255,255,255,.04);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:flex-start}.q-item-text{flex:1}.q-item-question{color:#fff;font-size:14px;margin-bottom:4px}.q-item-answer{color:#22c55e;font-size:12px}.q-item-del{background:rgba(239,68,68,.15);color:#ef4444;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-family:'Tajawal',sans-serif;margin-right:8px;flex-shrink:0}.add-q-form{background:rgba(245,200,66,.05);border-radius:12px;padding:14px;border:1px dashed rgba(245,200,66,.2)}.add-q-form .form-label{color:#f5c842;font-size:12px;margin-bottom:8px}.add-q-form input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;color:#fff;font-size:14px;outline:none;font-family:'Tajawal',sans-serif;direction:rtl;margin-bottom:6px}.add-q-row{display:flex;gap:6px}.add-q-row input{flex:1}.add-q-btn{margin-top:8px;padding:8px 22px;border-radius:8px;background:linear-gradient(135deg,#f5c842,#f59e0b);color:#0a0e27;border:none;cursor:pointer;font-size:13px;font-weight:700;font-family:'Tajawal',sans-serif}.editor-actions{display:flex;gap:8px}.btn-danger{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)}.btn-close-editor{padding:6px 16px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;border:none;cursor:pointer;font-size:16px}
 @media(max-width:600px){.setup-card{padding:28px 18px}.setup-title h1{font-size:36px}.team-badge{padding:6px 10px}.team-name{font-size:13px}.score-num{font-size:18px}.q-text{font-size:22px}.tool-btn{padding:6px 10px;font-size:11px}.top-bar{padding:8px 10px}.bottom-toolbar{padding:8px 10px}.win-team{font-size:36px}.q-btn{padding:8px 16px;font-size:12px}}
 </style>
 </head>
@@ -79,53 +83,38 @@ body{font-family:'Tajawal',sans-serif;background:linear-gradient(135deg,#0a0e27 
 <div id="game-screen" class="screen"><div class="top-bar"><div class="team-badge" id="badge-team1"><div class="team-dot" id="dot-team1"></div><span class="team-name" id="name-team1"></span><span class="team-dir-label">← →</span></div><div class="score-center"><div class="score-box"><span class="score-num" id="score-team1">0</span><span class="score-sep">—</span><span class="score-num" id="score-team2">0</span></div><span class="best-of-label" id="best-of-label"></span></div><div class="team-badge" id="badge-team2"><span class="team-dir-label">↑ ↓</span><span class="team-name" id="name-team2"></span><div class="team-dot" id="dot-team2"></div></div></div>
 <div class="board-area"><div class="players-panel" id="players-panel"><h3>🔗 اللاعبون</h3><div id="players-list"></div></div><div class="board-wrapper" id="board-wrapper"><svg id="board-svg" class="board-svg"></svg></div></div>
 <div class="bottom-toolbar"><button class="tool-btn" onclick="goToSetup()">⚙️</button><button class="tool-btn" onclick="regenerateBoard()">🔀 تبديل</button><button class="tool-btn" id="undo-btn" onclick="undoMove()" disabled>↩️ تراجع</button><button class="tool-btn" onclick="toggleFullscreen()">🔳</button><button class="tool-btn" onclick="newMatch()">🔄 جديدة</button><button class="tool-btn" onclick="resetBuzzer()" style="color:#f5c842">🔔 إعادة تعيين</button></div></div>
-
-<div id="question-modal" class="modal-overlay">
-  <div class="modal-card" onclick="event.stopPropagation()">
-    <div class="q-header" id="q-header"><div style="display:flex;align-items:center;gap:12px"><div class="q-letter-box" id="q-letter-box"></div><div class="q-info"><div class="q-letter-label" id="q-letter-label"></div><div class="q-category" id="q-category"></div></div></div><button class="q-close-btn" onclick="closeQM()">✕</button></div>
-    <div class="q-body"><div class="q-text" id="q-text"></div></div>
-    <div class="q-answer-wrap" id="q-answer-wrap"><div class="q-answer-box"><div class="q-answer-label">الإجابة</div><div class="q-answer-text" id="q-answer-text"></div></div></div>
-    <div class="buzzer-host" id="buzzer-host"><div class="buzz-waiting">🔔 في انتظار الضغط...</div></div>
-    <div class="q-actions" id="q-actions">
-      <button class="q-btn q-btn-reveal" id="q-reveal-btn" onclick="revealAns()">👁 الإجابة</button>
-      <button class="q-btn q-btn-reset" onclick="resetBuzzer()">🔔 إعادة تعيين</button>
-    </div>
-  </div>
-</div>
-
+<div id="question-modal" class="modal-overlay"><div class="modal-card" onclick="event.stopPropagation()"><div class="q-header" id="q-header"><div style="display:flex;align-items:center;gap:12px"><div class="q-letter-box" id="q-letter-box"></div><div class="q-info"><div class="q-letter-label" id="q-letter-label"></div><div class="q-category" id="q-category"></div></div></div><button class="q-close-btn" onclick="closeQM()">✕</button></div><div class="q-body"><div class="q-text" id="q-text"></div></div><div class="q-answer-wrap" id="q-answer-wrap"><div class="q-answer-box"><div class="q-answer-label">الإجابة</div><div class="q-answer-text" id="q-answer-text"></div></div></div><div class="buzzer-host" id="buzzer-host"><div class="buzz-waiting">🔔 في انتظار الضغط...</div></div><div class="q-actions" id="q-actions"><button class="q-btn q-btn-reveal" onclick="revealAns()">👁 الإجابة</button><button class="q-btn q-btn-reset" onclick="resetBuzzer()">🔔 إعادة تعيين</button></div></div></div>
 <div id="win-modal" class="modal-overlay"><div class="modal-card" onclick="event.stopPropagation()"><div class="win-icon" id="win-icon">🎉</div><div class="win-team" id="win-team-name"></div><div class="win-label" id="win-label"></div><div class="win-score" id="win-score"></div><div class="win-actions" id="win-actions"></div></div></div>
 <div id="editor-modal" class="modal-overlay" onclick="closeEditor()"><div class="modal-card" onclick="event.stopPropagation()"><div class="editor-header"><h2>تعديل الأسئلة</h2><div class="editor-actions"><button class="btn-sm btn-danger" onclick="clearAllQ()">حذف الكل</button><button class="btn-close-editor" onclick="closeEditor()">✕</button></div></div><div class="editor-body"><div class="letter-list" id="editor-letters"></div><div class="editor-content" id="editor-content"></div></div></div></div>
-
 <script>
 const firebaseConfig={apiKey:"AIzaSyDGs9ZC57R1yaGfyCtFDnj8_VciLEjGFoQ",authDomain:"blockbusters-buzz.firebaseapp.com",databaseURL:"https://blockbusters-buzz-default-rtdb.europe-west1.firebasedatabase.app",projectId:"blockbusters-buzz",storageBucket:"blockbusters-buzz.firebasestorage.app",messagingSenderId:"307733370745",appId:"1:307733370745:web:9506fd3c2ba745fb1141a8"};
-firebase.initializeApp(firebaseConfig);
-const db=firebase.database(),buzzerRef=db.ref('buzzer');
+firebase.initializeApp(firebaseConfig);const db=firebase.database(),bRef=db.ref('buzzer');
 
 const AR=["أ","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","ه","و","ي"];
 const COL=[{n:"سماوي",v:"#0ea5e9",g:"rgba(14,165,233,0.5)"},{n:"أحمر",v:"#ef4444",g:"rgba(239,68,68,0.5)"},{n:"أخضر",v:"#22c55e",g:"rgba(34,197,94,0.5)"},{n:"بنفسجي",v:"#a855f7",g:"rgba(168,85,247,0.5)"},{n:"برتقالي",v:"#f97316",g:"rgba(249,115,22,0.5)"},{n:"وردي",v:"#ec4899",g:"rgba(236,72,153,0.5)"},{n:"ذهبي",v:"#eab308",g:"rgba(234,179,8,0.5)"},{n:"أزرق",v:"#3b82f6",g:"rgba(59,130,246,0.5)"}];
-const GRIDS=[4,5,6,7,8],RNDS=[{l:"جولة",v:1},{l:"من 3",v:3},{l:"من 5",v:5}],S3=Math.sqrt(3),CIRC=2*Math.PI*34;
+const GRIDS=[4,5,6,7,8],RNDS=[{l:"جولة",v:1},{l:"من 3",v:3},{l:"من 5",v:5}],S3=Math.sqrt(3),RC=2*Math.PI*34;
 let G={t1c:0,t2c:1,gi:1,ri:0,qs:{},board:[],N:5,rw:[0,0],hist:[],used:{},wp:null,sel:null,cq:null,el:"أ",snd:false,syn:null};
-let hostTimer=null,currentBuzzer=null,currentFBState='idle';
+let hostTimer=null,currentWinner=null,currentFBState='idle',cachedPlayers={};
 const DQ={};AR.forEach(l=>{DQ[l]=[{q:"سؤال حرف "+l,a:"إجابة "+l,cat:"عام"}]});G.qs=JSON.parse(JSON.stringify(DQ));
 
-// Sounds
+// ═══ SOUNDS ═══
 async function initS(){if(G.snd)return;try{await Tone.start();G.syn=new Tone.PolySynth(Tone.Synth,{maxPolyphony:8,options:{envelope:{attack:.01,decay:.2,sustain:.1,release:.3}}}).toDestination();G.syn.volume.value=-8;G.snd=true}catch(e){}}
 async function sC(){await initS();if(!G.syn)return;const n=Tone.now();G.syn.triggerAttackRelease("E5","16n",n);G.syn.triggerAttackRelease("G5","16n",n+.08);G.syn.triggerAttackRelease("B5","16n",n+.16)}
 async function sB(){await initS();const b=new Tone.Synth({oscillator:{type:"sawtooth"},envelope:{attack:.01,decay:.3,sustain:0,release:.1}}).toDestination();b.volume.value=-12;b.triggerAttackRelease("A2","8n");setTimeout(()=>b.dispose(),1e3)}
 async function sW(){await initS();if(!G.syn)return;const n=Tone.now();["C5","E5","G5","C6"].forEach((x,i)=>G.syn.triggerAttackRelease(x,"8n",n+i*.15))}
 async function sK(){await initS();if(!G.syn)return;G.syn.triggerAttackRelease("G4","32n")}
 async function sM(){await initS();if(!G.syn)return;const n=Tone.now();["C4","E4","G4","C5","E5","G5","C6"].forEach((x,i)=>G.syn.triggerAttackRelease(x,"8n",n+i*.12))}
-async function sBz(){await initS();if(!G.syn)return;const n=Tone.now();G.syn.triggerAttackRelease("C6","16n",n);G.syn.triggerAttackRelease("G5","16n",n+.05)}
+async function sBz(){await initS();if(!G.syn)return;const n=Tone.now();G.syn.triggerAttackRelease("C6","16n",n);G.syn.triggerAttackRelease("E6","16n",n+.06)}
 
-// Hex
+// ═══ HEX ═══
 function cPos(c,r,sz){return{x:sz*1.5*c,y:sz*S3*(r+.5*(c%2))}}
 function hPts(cx,cy,sz){return Array.from({length:6},(_,i)=>{const a=Math.PI/3*i;return(cx+sz*Math.cos(a))+","+(cy+sz*Math.sin(a))}).join(" ")}
-function checkWin(board,ti,N){const k=(c,r)=>c+","+r;const own=new Set(board.filter(h=>h.o===ti).map(h=>k(h.c,h.r)));const sF=ti===0?(c,r)=>c===0:(c,r)=>r===0;const eF=ti===0?(c,r)=>c===N-1:(c,r)=>r===N-1;const starts=board.filter(h=>h.o===ti&&sF(h.c,h.r));const vis=new Set(),queue=starts.map(h=>({c:h.c,r:h.r,p:[k(h.c,h.r)]}));starts.forEach(h=>vis.add(k(h.c,h.r)));while(queue.length){const cur=queue.shift();if(eF(cur.c,cur.r))return cur.p;const odd=cur.c%2===1;const offs=odd?[[1,0],[1,1],[-1,0],[-1,1],[0,-1],[0,1]]:[[1,-1],[1,0],[-1,-1],[-1,0],[0,-1],[0,1]];for(const[dc,dr]of offs){const nc=cur.c+dc,nr=cur.r+dr,nk=k(nc,nr);if(own.has(nk)&&!vis.has(nk)){vis.add(nk);queue.push({c:nc,r:nr,p:[...cur.p,nk]})}}}return null}
+function checkWin(board,ti,N){const k=(c,r)=>c+","+r;const own=new Set(board.filter(h=>h.o===ti).map(h=>k(h.c,h.r)));const sF=ti===0?(c)=>c===0:(_,r)=>r===0;const eF=ti===0?(c)=>c===N-1:(_,r)=>r===N-1;const starts=board.filter(h=>h.o===ti&&sF(h.c,h.r));const vis=new Set(),queue=starts.map(h=>({c:h.c,r:h.r,p:[k(h.c,h.r)]}));starts.forEach(h=>vis.add(k(h.c,h.r)));while(queue.length){const cur=queue.shift();if(eF(cur.c,cur.r))return cur.p;const odd=cur.c%2===1;const offs=odd?[[1,0],[1,1],[-1,0],[-1,1],[0,-1],[0,1]]:[[1,-1],[1,0],[-1,-1],[-1,0],[0,-1],[0,1]];for(const[dc,dr]of offs){const nc=cur.c+dc,nr=cur.r+dr,nk=k(nc,nr);if(own.has(nk)&&!vis.has(nk)){vis.add(nk);queue.push({c:nc,r:nr,p:[...cur.p,nk]})}}}return null}
 function genBoard(N){const cells=[];for(let c=0;c<N;c++)for(let r=0;r<N;r++)cells.push({c,r,o:null});const pool=[...AR];while(pool.length<cells.length)pool.push(AR[Math.floor(Math.random()*AR.length)]);const sh=pool.sort(()=>Math.random()-.5);cells.forEach((h,i)=>h.l=sh[i%sh.length]);return cells}
 function getBorders(N){const bs=[];for(let r=0;r<N;r++){bs.push({c:-1,r,t:0});bs.push({c:N,r,t:0})}for(let c=0;c<N;c++){bs.push({c,r:-1,t:1});bs.push({c,r:N,t:1})}return bs}
 function tm(){return[{n:document.getElementById("team1-name").value||"الفريق الأول",c:COL[G.t1c]},{n:document.getElementById("team2-name").value||"الفريق الثاني",c:COL[G.t2c]}]}
 
-// Setup
+// ═══ SETUP ═══
 function buildSetup(){["team1","team2"].forEach((tid,ti)=>{const el=document.getElementById(tid+"-colors");el.innerHTML="";const ck=ti===0?"t1c":"t2c";COL.forEach((c,ci)=>{const sw=document.createElement("div");sw.className="color-swatch"+(G[ck]===ci?" selected":"");sw.style.background=c.v;sw.onclick=()=>{G[ck]=ci;buildSetup()};el.appendChild(sw)});document.getElementById(tid+"-group").style.borderColor=COL[G[ck]].v+"33"});const go=document.getElementById("grid-options");go.innerHTML="";GRIDS.forEach((n,i)=>{const b=document.createElement("button");b.className="option-btn"+(G.gi===i?" selected":"");b.textContent=n+"×"+n;b.onclick=()=>{G.gi=i;buildSetup()};go.appendChild(b)});const ro=document.getElementById("round-options");ro.innerHTML="";RNDS.forEach((r,i)=>{const b=document.createElement("button");b.className="option-btn"+(G.ri===i?" selected":"");b.textContent=r.l;b.onclick=()=>{G.ri=i;buildSetup()};ro.appendChild(b)});updQC()}
 function updQC(){const t=Object.values(G.qs).reduce((s,a)=>s+a.length,0);document.getElementById("q-count-label").textContent="الأسئلة ("+t+")"}
 function toggleTemplate(){document.getElementById("template-box").classList.toggle("visible")}
@@ -136,104 +125,97 @@ function openEditor(){showM("editor-modal");renderEd()}function closeEditor(){hi
 function renderEd(){const ll=document.getElementById("editor-letters");ll.innerHTML="";AR.forEach(l=>{const b=document.createElement("button");b.className="letter-btn"+(G.el===l?" selected":"")+((G.qs[l]?.length>0)?" has-q":"");b.innerHTML=l+'<span class="dot"></span>';b.onclick=()=>{G.el=l;renderEd()};ll.appendChild(b)});const ec=document.getElementById("editor-content");const qs=G.qs[G.el]||[];ec.innerHTML='<div class="editor-letter-title">«'+G.el+'» ('+qs.length+')</div>';qs.forEach((q,i)=>{const d=document.createElement("div");d.className="q-item";d.innerHTML='<div class="q-item-text"><div class="q-item-question">'+q.q+'</div><div class="q-item-answer">'+q.a+'</div></div><button class="q-item-del">حذف</button>';d.querySelector(".q-item-del").onclick=()=>{G.qs[G.el].splice(i,1);renderEd()};ec.appendChild(d)});const fm=document.createElement("div");fm.className="add-q-form";fm.innerHTML='<div class="form-label">إضافة سؤال</div><input type="text" id="new-q" placeholder="السؤال..." dir="rtl"><div class="add-q-row"><input type="text" id="new-a" placeholder="الإجابة..." dir="rtl"><input type="text" id="new-cat" placeholder="التصنيف" dir="rtl"></div><button class="add-q-btn" id="add-q-btn">+</button>';ec.appendChild(fm);document.getElementById("add-q-btn").onclick=()=>{const t=document.getElementById("new-q").value.trim();if(!t)return;if(!G.qs[G.el])G.qs[G.el]=[];G.qs[G.el].push({q:t,a:document.getElementById("new-a").value.trim(),cat:document.getElementById("new-cat").value.trim()});renderEd()}}
 function clearAllQ(){if(!confirm("حذف الكل؟"))return;G.qs={};renderEd()}
 
-// ═══ SYNC TEAM NAMES ═══
-function syncTeamNames(){
-  const t=tm();
-  buzzerRef.child('teamNames').set({t1:t[0].n,t2:t[1].n});
-}
+// ═══ TEAM NAMES SYNC ═══
+function syncTeamNames(){bRef.child('teamNames').set({t1:tm()[0].n,t2:tm()[1].n})}
 document.getElementById('team1-name').addEventListener('input',syncTeamNames);
 document.getElementById('team2-name').addEventListener('input',syncTeamNames);
 
-// ═══ PLAYERS LIST ═══
-buzzerRef.child('players').on('value',snap=>{
-  const p=snap.val()||{},el=document.getElementById('players-list');let h='';
-  for(let i=1;i<=6;i++){const pl=p[i];if(pl&&pl.name){const tc=pl.team===1?tm()[0].c.v:tm()[1].c.v;h+='<div class="player-slot'+(pl.online?'':' offline')+'"><div class="p-dot" style="background:'+tc+'"></div><span class="p-name" style="color:'+tc+'">'+pl.name+'</span></div>'}}
-  if(!h)h='<div style="color:#555;font-size:11px;text-align:center">لا يوجد لاعبون</div>';el.innerHTML=h;
+// ═══ PLAYERS LIST + HOST CONTROLS ═══
+bRef.child('players').on('value',snap=>{
+  cachedPlayers=snap.val()||{};
+  const el=document.getElementById('players-list');let h='';
+  const entries=Object.entries(cachedPlayers);
+  if(!entries.length){el.innerHTML='<div class="pp-none">لا يوجد لاعبون</div>';return}
+  entries.forEach(([id,p])=>{
+    if(!p.name)return;
+    const tc=p.team===1?tm()[0].c.v:tm()[1].c.v;
+    const otherTeam=p.team===1?2:1;
+    h+='<div class="pp-slot'+(p.online?'':' offline')+'">';
+    h+='<div class="pp-dot" style="background:'+tc+'"></div>';
+    h+='<span class="pp-name" style="color:'+tc+'">'+p.name+'</span>';
+    h+='<div class="pp-actions">';
+    h+='<button class="pp-btn'+(p.muted?' muted':'')+'" onclick="toggleMute(\''+id+'\')" title="'+(p.muted?'إلغاء الكتم':'كتم')+'">'+(p.muted?'🔇':'🔈')+'</button>';
+    h+='<button class="pp-btn" onclick="switchTeam(\''+id+'\','+otherTeam+')" title="نقل للفريق الآخر">🔄</button>';
+    h+='<button class="pp-btn danger" onclick="kickPlayer(\''+id+'\')" title="إخراج">✕</button>';
+    h+='</div></div>';
+  });
+  el.innerHTML=h;
 });
+function kickPlayer(id){if(confirm('إخراج هذا اللاعب؟'))bRef.child('players/'+id).remove()}
+function toggleMute(id){const p=cachedPlayers[id];if(p)bRef.child('players/'+id+'/muted').set(!p.muted)}
+function switchTeam(id,newTeam){bRef.child('players/'+id+'/team').set(newTeam)}
 
-// ═══ BUZZ QUEUE → pick first ═══
-buzzerRef.child('buzzQueue').on('value',snap=>{
-  const q=snap.val();if(!q)return;let first=null;
-  Object.values(q).forEach(e=>{if(!first||e.time<first.time)first=e});
-  if(first){buzzerRef.update({state:'buzzed',buzzedBy:first});buzzerRef.child('buzzQueue').remove()}
-});
-
-// ═══ LISTEN STATE ═══
-buzzerRef.on('value',snap=>{
-  const d=snap.val()||{},state=d.state||'idle',buzzedBy=d.buzzedBy||null,lockedTeam=d.lockedTeam||null;
-  const timer=d.timer||null;
-  currentBuzzer=buzzedBy;currentFBState=state;
-  const bh=document.getElementById('buzzer-host'),qa=document.getElementById('q-actions');
-  
-  if(state==='idle'){
-    bh.innerHTML='';
-    qa.innerHTML='<button class="q-btn q-btn-reveal" id="q-reveal-btn" onclick="revealAns()">👁 الإجابة</button><button class="q-btn q-btn-reset" onclick="resetBuzzer()">🔔 إعادة تعيين</button>';
-    stopHostTimer();
-  }
-  else if(state==='open'||state==='open_all'){
-    bh.innerHTML='<div class="buzz-waiting">🔔 في انتظار الضغط...</div>';
-    qa.innerHTML='<button class="q-btn q-btn-reveal" id="q-reveal-btn" onclick="revealAns()">👁 الإجابة</button><button class="q-btn q-btn-reset" onclick="resetBuzzer()">🔔 إعادة تعيين</button>';
-    stopHostTimer();
-  }
-  else if(state==='buzzed'&&buzzedBy){
+// ═══ ATOMIC BUZZ: winner transaction ═══
+bRef.child('winner').on('value',snap=>{
+  const w=snap.val();
+  if(w&&w.id&&currentFBState==='open'){
+    // Someone buzzed — set state to buzzed
+    bRef.child('state').set('buzzed');
     sBz();
-    const tc=buzzedBy.team===1?tm()[0].c.v:tm()[1].c.v;
-    const tn=buzzedBy.team===1?tm()[0].n:tm()[1].n;
-    bh.innerHTML='<div class="buzz-who"><div class="host-timer" id="host-timer"><svg viewBox="0 0 76 76"><circle class="ring-bg" cx="38" cy="38" r="34"/><circle class="ring-fg" id="ring-fg" cx="38" cy="38" r="34" stroke="'+tc+'" stroke-dasharray="'+2*Math.PI*34+'" stroke-dashoffset="0"/></svg><div class="ring-num" id="ring-num" style="color:'+tc+'">—</div></div><div class="buzz-who-info"><div class="buzz-who-name" style="color:'+tc+'">🔔 '+buzzedBy.name+'</div><div class="buzz-who-team">'+tn+'</div></div></div>';
-    // Show timer + correct/wrong buttons. Timer is NOT auto-started.
-    qa.innerHTML='<button class="q-btn q-btn-timer" onclick="startTimer(3)">⏱ ابدأ العداد (3 ث)</button><button class="q-btn q-btn-correct" onclick="handleOK()">✓ صحيحة</button><button class="q-btn q-btn-wrong" onclick="handleNo()">✗ خاطئة</button><button class="q-btn q-btn-reveal" id="q-reveal-btn" onclick="revealAns()">👁 الإجابة</button><button class="q-btn q-btn-reset" onclick="resetBuzzer()">🔔 إعادة تعيين</button>';
-    // If timer already running from firebase
-    if(timer&&timer.running)runHostTimer(timer.endsAt,timer.total,tc);
+  }
+  if(w&&w.id&&(currentFBState==='team_chance'||currentFBState==='open_all')){
+    bRef.child('state').set('buzzed');
+    sBz();
+  }
+});
+
+// ═══ MAIN STATE LISTENER ═══
+bRef.on('value',snap=>{
+  const d=snap.val()||{},state=d.state||'idle',winner=d.winner||null,lockedTeam=d.lockedTeam||null,timer=d.timer||null;
+  currentWinner=winner;currentFBState=state;
+  const bh=document.getElementById('buzzer-host'),qa=document.getElementById('q-actions');
+  const baseActions='<button class="q-btn q-btn-reveal" onclick="revealAns()">👁 الإجابة</button><button class="q-btn q-btn-reset" onclick="resetBuzzer()">🔔 إعادة تعيين</button>';
+
+  if(state==='idle'||state==='open'||state==='open_all'){
+    bh.innerHTML='<div class="buzz-waiting">🔔 في انتظار الضغط...</div>';
+    qa.innerHTML=baseActions;stopHostTimer();
+  }
+  else if(state==='buzzed'&&winner){
+    const tc=winner.team===1?tm()[0].c.v:tm()[1].c.v;
+    const tn=winner.team===1?tm()[0].n:tm()[1].n;
+    bh.innerHTML='<div class="buzz-who"><div class="host-timer" id="host-timer"><svg viewBox="0 0 76 76"><circle class="ring-bg" cx="38" cy="38" r="34"/><circle class="ring-fg" id="ring-fg" cx="38" cy="38" r="34" stroke="'+tc+'" stroke-dasharray="'+RC+'" stroke-dashoffset="0"/></svg><div class="ring-num" id="ring-num" style="color:'+tc+'">—</div></div><div class="buzz-who-info"><div class="buzz-who-name" style="color:'+tc+'">🔔 '+winner.name+'</div><div class="buzz-who-team">'+tn+'</div></div></div>';
+    qa.innerHTML='<button class="q-btn q-btn-timer" onclick="startTimer(3)">⏱ ابدأ العداد (3 ث)</button><button class="q-btn q-btn-correct" onclick="handleOK()">✓ صحيحة</button><button class="q-btn q-btn-wrong" onclick="handleNo()">✗ خاطئة</button>'+baseActions;
+    if(timer&&timer.running)runHostTimer(timer.endsAt,timer.total,tc);else stopHostTimer();
   }
   else if(state==='team_chance'){
-    const otherTeam=lockedTeam===1?2:1;
-    const tc=otherTeam===1?tm()[0].c.v:tm()[1].c.v;
-    const tn=otherTeam===1?tm()[0].n:tm()[1].n;
-    bh.innerHTML='<div class="buzz-who"><div class="host-timer" id="host-timer"><svg viewBox="0 0 76 76"><circle class="ring-bg" cx="38" cy="38" r="34"/><circle class="ring-fg" id="ring-fg" cx="38" cy="38" r="34" stroke="#f97316" stroke-dasharray="'+2*Math.PI*34+'" stroke-dashoffset="0"/></svg><div class="ring-num" id="ring-num" style="color:#f97316">—</div></div><div class="buzz-who-info"><div class="buzz-team-chance-label">⚡ فرصة لـ <span style="color:'+tc+'">'+tn+'</span></div></div></div>';
-    qa.innerHTML='<button class="q-btn q-btn-timer" onclick="startTimer(10)">⏱ ابدأ العداد (10 ث)</button><button class="q-btn q-btn-reveal" id="q-reveal-btn" onclick="revealAns()">👁 الإجابة</button><button class="q-btn q-btn-reset" onclick="resetBuzzer()">🔔 إعادة تعيين</button>';
-    if(timer&&timer.running)runHostTimer(timer.endsAt,timer.total,'#f97316');
+    const otherTeam=lockedTeam===1?2:1;const tc=otherTeam===1?tm()[0].c.v:tm()[1].c.v;const tn=otherTeam===1?tm()[0].n:tm()[1].n;
+    bh.innerHTML='<div class="buzz-who"><div class="host-timer" id="host-timer"><svg viewBox="0 0 76 76"><circle class="ring-bg" cx="38" cy="38" r="34"/><circle class="ring-fg" id="ring-fg" cx="38" cy="38" r="34" stroke="#f97316" stroke-dasharray="'+RC+'" stroke-dashoffset="0"/></svg><div class="ring-num" id="ring-num" style="color:#f97316">—</div></div><div class="buzz-who-info"><div class="buzz-chance-label">⚡ فرصة لـ <span style="color:'+tc+'">'+tn+'</span></div></div></div>';
+    qa.innerHTML='<button class="q-btn q-btn-timer" onclick="startTimer(10)">⏱ ابدأ العداد (10 ث)</button>'+baseActions;
+    if(timer&&timer.running)runHostTimer(timer.endsAt,timer.total,'#f97316');else stopHostTimer();
   }
 });
 
 // ═══ HOST TIMER ═══
 function startTimer(sec){
-  const endsAt=Date.now()+sec*1000;
-  buzzerRef.child('timer').set({running:true,total:sec,endsAt:endsAt});
-  const color=currentFBState==='team_chance'?'#f97316':(currentBuzzer?((currentBuzzer.team===1?tm()[0].c.v:tm()[1].c.v)):'#f5c842');
-  runHostTimer(endsAt,sec,color);
+  const ea=Date.now()+sec*1000;bRef.child('timer').set({running:true,total:sec,endsAt:ea});
+  const color=currentFBState==='team_chance'?'#f97316':(currentWinner?(currentWinner.team===1?tm()[0].c.v:tm()[1].c.v):'#f5c842');
+  runHostTimer(ea,sec,color);
 }
-function runHostTimer(endsAt,total,color){
+function runHostTimer(ea,total,color){
   stopHostTimer();
-  function tick(){
-    const left=Math.max(0,(endsAt-Date.now())/1000);
-    const frac=left/total;
+  function tick(){const left=Math.max(0,(ea-Date.now())/1000),frac=left/total;
     const fg=document.getElementById('ring-fg'),num=document.getElementById('ring-num'),wrap=document.getElementById('host-timer');
-    if(!fg||!num)return;
-    fg.style.strokeDashoffset=((1-frac)*CIRC).toFixed(1);
-    num.textContent=Math.ceil(left);
-    if(left<=3&&total>3){if(wrap)wrap.classList.add('danger')}
-    if(left<=0){
-      clearInterval(hostTimer);num.textContent='0';
-      buzzerRef.child('timer').set({running:false,total:0,endsAt:0});
-      // Auto action on timeout
+    if(!fg||!num)return;fg.style.strokeDashoffset=((1-frac)*RC).toFixed(1);num.textContent=Math.ceil(left);
+    if(left<=3&&total>3&&wrap)wrap.classList.add('danger');
+    if(left<=0){clearInterval(hostTimer);num.textContent='0';bRef.child('timer').set({running:false});
       if(currentFBState==='buzzed')handleNo();
-      else if(currentFBState==='team_chance'){buzzerRef.update({state:'open_all',buzzedBy:null,lockedTeam:null});buzzerRef.child('buzzQueue').remove()}
+      else if(currentFBState==='team_chance'){bRef.update({state:'open_all',winner:null,lockedTeam:null})}
     }
-  }
-  tick();hostTimer=setInterval(tick,100);
+  }tick();hostTimer=setInterval(tick,100);
 }
 function stopHostTimer(){clearInterval(hostTimer)}
-
-function resetBuzzer(){
-  stopHostTimer();
-  buzzerRef.update({state:'open',buzzedBy:null,lockedTeam:null,timer:{running:false,total:0,endsAt:0}});
-  buzzerRef.child('buzzQueue').remove();
-}
-function setBuzzerIdle(){
-  stopHostTimer();
-  buzzerRef.update({state:'idle',buzzedBy:null,lockedTeam:null,timer:{running:false,total:0,endsAt:0}});
-  buzzerRef.child('buzzQueue').remove();
-}
+function resetBuzzer(){stopHostTimer();bRef.update({state:'open',winner:null,lockedTeam:null,timer:{running:false}})}
+function setBuzzerIdle(){stopHostTimer();bRef.update({state:'idle',winner:null,lockedTeam:null,timer:{running:false},currentQuestion:null})}
 
 // ═══ GAME ═══
 function startGame(){G.N=GRIDS[G.gi];G.board=genBoard(G.N);G.rw=[0,0];G.hist=[];G.used={};G.wp=null;showScr("game-screen");renderUI();renderBoard();syncTeamNames();resetBuzzer()}
@@ -243,28 +225,24 @@ function renderBoard(){const t=tm(),svg=document.getElementById("board-svg"),N=G
 function hH(g,on,ow){if(ow)return;const p=g.querySelector(".hex-poly");if(on){p.setAttribute("stroke","#f5c842");p.setAttribute("stroke-width","3")}else{p.setAttribute("stroke","#b8b8c8");p.setAttribute("stroke-width","1.5")}}
 
 function onHex(c,r){const h=G.board.find(x=>x.c===c&&x.r===r);if(!h||h.o!==null||G.wp)return;sK();const qs=G.qs[h.l];if(!qs||!qs.length){alert('لا توجد أسئلة لحرف "'+h.l+'"');return}const u=G.used[h.l]||[];const av=qs.map((q,i)=>({q,i})).filter(x=>!u.includes(x.i));let pk;if(av.length>0){pk=av[Math.floor(Math.random()*av.length)];if(!G.used[h.l])G.used[h.l]=[];G.used[h.l].push(pk.i)}else{pk={q:qs[Math.floor(Math.random()*qs.length)]}}G.sel=h;G.cq=pk.q;showQM()}
-function showQM(){const h=G.sel,q=G.cq;document.getElementById("q-letter-box").textContent=h.l;document.getElementById("q-letter-box").style.background="linear-gradient(135deg,#f5c842,#f59e0b)";document.getElementById("q-header").style.background="linear-gradient(135deg,rgba(245,200,66,.1),transparent)";document.getElementById("q-letter-label").textContent="حرف «"+h.l+"»";document.getElementById("q-category").textContent=q.cat?"التصنيف: "+q.cat:"";document.getElementById("q-text").textContent=q.q;document.getElementById("q-answer-text").textContent=q.a||"—";document.getElementById("q-answer-wrap").classList.remove("visible");showM("question-modal");resetBuzzer()}
+function showQM(){const h=G.sel,q=G.cq;document.getElementById("q-letter-box").textContent=h.l;document.getElementById("q-letter-box").style.background="linear-gradient(135deg,#f5c842,#f59e0b)";document.getElementById("q-header").style.background="linear-gradient(135deg,rgba(245,200,66,.1),transparent)";document.getElementById("q-letter-label").textContent="حرف «"+h.l+"»";document.getElementById("q-category").textContent=q.cat?"التصنيف: "+q.cat:"";document.getElementById("q-text").textContent=q.q;document.getElementById("q-answer-text").textContent=q.a||"—";document.getElementById("q-answer-wrap").classList.remove("visible");
+  // Sync question to players
+  bRef.child('currentQuestion').set({letter:h.l,text:q.q,cat:q.cat||''});
+  showM("question-modal");resetBuzzer();
+}
 function revealAns(){document.getElementById("q-answer-wrap").classList.add("visible")}
 function closeQM(){hideM("question-modal");G.sel=null;G.cq=null;setBuzzerIdle()}
 
 function handleOK(){
-  stopHostTimer();sC();
-  if(!currentBuzzer||!G.sel)return;
-  const ti=currentBuzzer.team-1,h=G.sel;
-  h.o=ti;G.hist.push({c:h.c,r:h.r,t:ti});
+  stopHostTimer();sC();if(!currentWinner||!G.sel)return;
+  const ti=currentWinner.team-1,h=G.sel;h.o=ti;G.hist.push({c:h.c,r:h.r,t:ti});
   hideM("question-modal");setBuzzerIdle();renderBoard();
   const path=checkWin(G.board,ti,G.N);
   if(path){G.wp=path;renderBoard();sW();G.rw[ti]++;renderUI();const bo=RNDS[G.ri].v,need=Math.ceil(bo/2),isM=G.rw[ti]>=need;setTimeout(()=>{if(isM)sM();showWin(ti,isM)},800)}
   G.sel=null;G.cq=null;
 }
 function handleNo(){
-  stopHostTimer();sB();
-  if(currentBuzzer){
-    const lt=currentBuzzer.team;
-    buzzerRef.update({state:'team_chance',buzzedBy:null,lockedTeam:lt,timer:{running:false,total:0,endsAt:0}});
-    buzzerRef.child('buzzQueue').remove();
-  }
-}
+  stopHostTimer();sB();if(currentWinner){const lt=currentWinner.team;bRef.update({state:'team_chance',winner:null,lockedTeam:lt,timer:{running:false}})}}
 
 function showWin(wi,isM){const t=tm();document.getElementById("win-icon").textContent=isM?"🏆":"🎉";document.getElementById("win-team-name").textContent=t[wi].n;document.getElementById("win-team-name").style.color=t[wi].c.v;document.getElementById("win-team-name").style.textShadow="0 0 40px "+t[wi].c.g;document.getElementById("win-label").textContent=isM?"فاز بالمباراة!":"فاز بالجولة!";document.getElementById("win-score").innerHTML='<span class="win-score-num" style="color:'+t[0].c.v+'">'+G.rw[0]+'</span> - <span class="win-score-num" style="color:'+t[1].c.v+'">'+G.rw[1]+'</span>';let a="";if(!isM)a+='<button class="win-btn-primary" onclick="nextRd()">التالية ▶</button>';a+='<button class="'+(isM?"win-btn-primary":"win-btn-secondary")+'" onclick="newMatch()">مباراة جديدة</button>';a+='<button class="win-btn-ghost" onclick="goToSetup()">الإعدادات</button>';document.getElementById("win-actions").innerHTML=a;showM("win-modal")}
 function nextRd(){hideM("win-modal");G.wp=null;G.board=genBoard(G.N);G.hist=[];renderBoard()}
